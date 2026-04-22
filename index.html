@@ -4,15 +4,17 @@
 <meta charset="UTF-8">
 <title>Biblioteca de Partituras</title>
 
-<link rel="stylesheet" href="estilos.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 
-<body>
+<body data-theme="light">
 
 <header>
   <h1>🎼 Biblioteca de Partituras</h1>
-  <button id="themeToggle">🌙 Modo oscuro</button>
+
   <input type="text" id="buscador" placeholder="Buscar partituras...">
+
+  <button id="themeToggle">🌙 Modo oscuro</button>
 </header>
 
 <div class="container">
@@ -30,6 +32,7 @@
 <script>
 let data = [];
 
+/* CARGAR JSON */
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
@@ -37,17 +40,28 @@ fetch('data.json')
     render(data);
   });
 
+/* RENDER */
 function render(lista) {
   let grid = document.getElementById("grid");
   grid.innerHTML = "";
 
   lista.forEach(p => {
+
     let div = document.createElement("div");
     div.className = "card";
 
+    let c1 = stringToColor(p.titulo);
+    let c2 = stringToColor(p.compositor || "x");
+
     div.innerHTML = `
-      <div class="titulo">${p.titulo}</div>
-      <div class="compositor">${p.compositor ? p.compositor : ""}</div>
+      <div class="cover" style="background: linear-gradient(135deg, ${c1}, ${c2})">
+        <div class="cover-title">${p.titulo}</div>
+      </div>
+
+      <div class="info">
+        <div class="titulo">${p.titulo}</div>
+        <div class="compositor">${p.compositor || ""}</div>
+      </div>
     `;
 
     div.onclick = () => verPDF(p.url);
@@ -78,6 +92,42 @@ function verPDF(url) {
   } else {
     document.getElementById("pdfFrame").src = url;
   }
+}
+
+/* TEMA */
+const btn = document.getElementById("themeToggle");
+
+function setTheme(theme) {
+  document.body.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
+
+  btn.textContent = theme === "dark"
+    ? "☀️ Modo claro"
+    : "🌙 Modo oscuro";
+}
+
+let saved = localStorage.getItem("theme") || "light";
+setTheme(saved);
+
+btn.onclick = () => {
+  let current = document.body.getAttribute("data-theme");
+  setTheme(current === "dark" ? "light" : "dark");
+};
+
+/* COLOR ALEATORIO ESTABLE */
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = "#";
+  for (let i = 0; i < 3; i++) {
+    let value = (hash >> (i * 8)) & 255;
+    color += ("00" + value.toString(16)).substr(-2);
+  }
+
+  return color;
 }
 </script>
 
