@@ -5,7 +5,7 @@ body {
   transition: 0.3s;
 }
 
-/* ===== LIGHT MODE ===== */
+/* ===== LIGHT ===== */
 body[data-theme="light"] {
   background: #f4f6fb;
   color: #222;
@@ -16,11 +16,7 @@ body[data-theme="light"] header {
   border-bottom: 4px solid #e63946;
 }
 
-body[data-theme="light"] h1 {
-  color: #e63946;
-}
-
-/* ===== DARK MODE ===== */
+/* ===== DARK ===== */
 body[data-theme="dark"] {
   background: #0f1115;
   color: #f1f1f1;
@@ -31,17 +27,12 @@ body[data-theme="dark"] header {
   border-bottom: 4px solid #ff4d5a;
 }
 
-body[data-theme="dark"] h1 {
-  color: #ff4d5a;
-}
-
-/* ===== HEADER ===== */
+/* HEADER */
 header {
   padding: 20px;
   text-align: center;
   position: sticky;
   top: 0;
-  z-index: 10;
 }
 
 h1 {
@@ -55,16 +46,10 @@ h1 {
   padding: 12px;
   border-radius: 10px;
   font-size: 16px;
+  border: none;
   outline: none;
-  border: 2px solid transparent;
 }
 
-/* focus más visible */
-#buscador:focus {
-  border-color: #e63946;
-}
-
-/* BOTÓN */
 #themeToggle {
   margin-top: 10px;
   padding: 8px 14px;
@@ -76,13 +61,13 @@ h1 {
   font-weight: bold;
 }
 
-/* ===== LAYOUT ===== */
+/* LAYOUT */
 .container {
   display: flex;
   height: calc(100vh - 140px);
 }
 
-/* ===== GRID ===== */
+/* GRID */
 .grid {
   width: 55%;
   display: grid;
@@ -92,50 +77,56 @@ h1 {
   overflow-y: auto;
 }
 
-/* ===== CARDS (MUCHO MÁS CONTRASTE) ===== */
+/* CARD */
 .card {
-  padding: 14px;
   border-radius: 12px;
   cursor: pointer;
   transition: 0.25s;
-  border-left: 6px solid #e63946;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 }
 
-/* LIGHT CARDS */
-body[data-theme="light"] .card {
-  background: #ffffff;
-  border: 1px solid #e6e6e6;
-}
-
-/* DARK CARDS */
-body[data-theme="dark"] .card {
-  background: #1a1d24;
-  border: 1px solid #2a2f3a;
-  border-left: 6px solid #ff4d5a;
-}
-
-/* HOVER MÁS FUERTE */
 .card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
 }
 
-/* TEXTO */
-.titulo {
-  font-size: 14px;
+/* COVER */
+.cover {
+  height: 120px;
+  display: flex;
+  align-items: flex-end;
+  padding: 10px;
+  color: white;
   font-weight: bold;
-  margin-bottom: 6px;
+  box-shadow: inset 0 -40px 40px rgba(0,0,0,0.3);
 }
 
-/* AUTOR MÁS DISTINTO */
+.cover-title {
+  font-size: 13px;
+}
+
+/* INFO */
+.info {
+  padding: 10px;
+  background: white;
+}
+
+body[data-theme="dark"] .info {
+  background: #1a1d24;
+}
+
+.titulo {
+  font-size: 13px;
+  font-weight: bold;
+}
+
 .compositor {
   font-size: 12px;
-  font-weight: 500;
-  opacity: 0.85;
+  opacity: 0.8;
+  margin-top: 4px;
 }
 
-/* ===== VISOR ===== */
+/* VISOR */
 .visor {
   width: 45%;
   padding: 10px;
@@ -145,12 +136,9 @@ iframe {
   width: 100%;
   height: 100%;
   border-radius: 12px;
-  background: white;
-  border: 2px solid #ddd;
+  border: 1px solid #ddd;
 }
 
-/* DARK VISOR */
 body[data-theme="dark"] iframe {
-  border: 2px solid #333;
-  background: #111;
+  border: 1px solid #333;
 }
