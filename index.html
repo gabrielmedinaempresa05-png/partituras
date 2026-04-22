@@ -135,7 +135,7 @@ function mostrar(lista) {
 
     div.innerHTML = `
       <div class="titulo">${p.titulo}</div>
-      <div>${p.compositor}</div>
+      ${p.compositor ? `<div>${p.compositor}</div>` : ""}
       <button onclick="verPDF('${p.url}')">Ver PDF</button>
     `;
 
