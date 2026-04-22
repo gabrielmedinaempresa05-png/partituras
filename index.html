@@ -19,8 +19,10 @@
 
 <div class="container">
 
+  <!-- GRID -->
   <div class="grid" id="grid"></div>
 
+  <!-- VISOR -->
   <div class="visor">
     <iframe id="pdfFrame"></iframe>
   </div>
@@ -30,30 +32,34 @@
 <script>
 let data = [];
 
-/* CARGA JSON */
-fetch('data.json?v=2')
+/* CARGAR JSON */
+fetch('data.json')
   .then(res => res.json())
   .then(json => {
     data = json;
     render(data);
-  })
-  .catch(err => console.log("ERROR JSON:", err));
+  });
 
 /* RENDER */
 function render(lista) {
-  const grid = document.getElementById("grid");
+  let grid = document.getElementById("grid");
   grid.innerHTML = "";
 
   lista.forEach(p => {
 
-    const div = document.createElement("div");
+    let div = document.createElement("div");
     div.className = "card";
 
+    let c1 = stringToColor(p.titulo);
+    let c2 = stringToColor(p.compositor || "x");
+
     div.innerHTML = `
-      <div class="cover">🎼</div>
+      <div class="cover" style="background: linear-gradient(135deg, ${c1}, ${c2})">
+        <div class="cover-title">${p.titulo}</div>
+      </div>
 
       <div class="info">
-        <div class="titulo">${p.titulo || ""}</div>
+        <div class="titulo">${p.titulo}</div>
         <div class="compositor">${p.compositor || ""}</div>
       </div>
     `;
@@ -68,40 +74,61 @@ function render(lista) {
 document.getElementById("buscador").addEventListener("input", function() {
   let v = this.value.toLowerCase();
 
-  render(data.filter(p =>
-    (p.titulo || "").toLowerCase().includes(v) ||
+  let filtrado = data.filter(p =>
+    p.titulo.toLowerCase().includes(v) ||
     (p.compositor || "").toLowerCase().includes(v)
-  ));
+  );
+
+  render(filtrado);
 });
 
-/* VISOR */
+/* VISOR PDF */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
   if (match) {
     document.getElementById("pdfFrame").src =
       "https://drive.google.com/file/d/" + match[1] + "/preview";
+  } else {
+    document.getElementById("pdfFrame").src = url;
   }
 }
 
 /* TEMA */
 const btn = document.getElementById("themeToggle");
 
-function setTheme(t) {
-  document.body.setAttribute("data-theme", t);
-  localStorage.setItem("theme", t);
+function setTheme(theme) {
+  document.body.setAttribute("data-theme", theme);
+  localStorage.setItem("theme", theme);
 
-  btn.textContent = t === "dark"
+  btn.textContent = theme === "dark"
     ? "☀️ Modo claro"
     : "🌙 Modo oscuro";
 }
 
-setTheme(localStorage.getItem("theme") || "light");
+let saved = localStorage.getItem("theme") || "light";
+setTheme(saved);
 
 btn.onclick = () => {
   let current = document.body.getAttribute("data-theme");
   setTheme(current === "dark" ? "light" : "dark");
 };
+
+/* COLOR ALEATORIO ESTABLE */
+function stringToColor(str) {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+
+  let color = "#";
+  for (let i = 0; i < 3; i++) {
+    let value = (hash >> (i * 8)) & 255;
+    color += ("00" + value.toString(16)).substr(-2);
+  }
+
+  return color;
+}
 </script>
 
 </body>
