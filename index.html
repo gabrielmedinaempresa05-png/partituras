@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Biblioteca de Partituras</title>
+</head>
+<body>
+
+<h1>🎼 Biblioteca de Partituras</h1>
+
+<input type="text" id="buscador" placeholder="Buscar por título o compositor">
+
+<ul id="resultados"></ul>
+
+<script>
+let data = [];
+
+fetch('data.json')
+  .then(res => res.json())
+  .then(json => data = json);
+
+document.getElementById('buscador').addEventListener('input', function() {
+  let valor = this.value.toLowerCase();
+
+  let resultados = data.filter(p =>
+    p.titulo.toLowerCase().includes(valor) ||
+    p.compositor.toLowerCase().includes(valor)
+  );
+
+  let lista = document.getElementById('resultados');
+  lista.innerHTML = '';
+
+  resultados.forEach(p => {
+    let li = document.createElement('li');
+    li.innerHTML = `<a href="${p.url}" target="_blank">${p.titulo} - ${p.compositor}</a>`;
+    lista.appendChild(li);
+  });
+});
+</script>
+
+</body>
+</html>
