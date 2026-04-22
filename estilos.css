@@ -1,16 +1,77 @@
+/* ===== BASE ===== */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  background: linear-gradient(135deg, #1e3c72, #2a5298);
-  color: white;
+  transition: 0.3s;
 }
 
-/* HEADER */
+/* ===== LIGHT MODE ===== */
+body[data-theme="light"] {
+  background: #f5f6fa;
+  color: #222;
+}
+
+body[data-theme="light"] header {
+  background: #ffffff;
+  border-bottom: 3px solid #e63946;
+}
+
+body[data-theme="light"] h1 {
+  color: #e63946;
+}
+
+body[data-theme="light"] .card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-left: 5px solid #e63946;
+}
+
+/* ===== DARK MODE ===== */
+body[data-theme="dark"] {
+  background: #121212;
+  color: #f1f1f1;
+}
+
+body[data-theme="dark"] header {
+  background: #1e1e1e;
+  border-bottom: 3px solid #e63946;
+}
+
+body[data-theme="dark"] h1 {
+  color: #ff4d5a;
+}
+
+body[data-theme="dark"] #buscador {
+  background: #2a2a2a;
+  color: white;
+  border: 1px solid #444;
+}
+
+body[data-theme="dark"] .card {
+  background: #1e1e1e;
+  border-left: 5px solid #ff4d5a;
+  border: 1px solid #333;
+}
+
+body[data-theme="dark"] .compositor {
+  color: #ff6b6b;
+}
+
+body[data-theme="dark"] .visor {
+  background: #0f0f0f;
+}
+
+body[data-theme="dark"] iframe {
+  border: 1px solid #333;
+}
+
+/* ===== HEADER ===== */
 header {
   padding: 20px;
   text-align: center;
-  background: rgba(0,0,0,0.25);
-  backdrop-filter: blur(10px);
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 h1 {
@@ -23,15 +84,26 @@ h1 {
   width: 60%;
   padding: 12px;
   border-radius: 10px;
-  border: none;
   font-size: 16px;
   outline: none;
+}
+
+/* BOTÓN TEMA */
+#themeToggle {
+  margin-top: 10px;
+  padding: 8px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  background: #e63946;
+  color: white;
+  font-weight: bold;
 }
 
 /* LAYOUT */
 .container {
   display: flex;
-  height: calc(100vh - 120px);
+  height: calc(100vh - 140px);
 }
 
 /* GRID */
@@ -44,20 +116,16 @@ h1 {
   overflow-y: auto;
 }
 
-/* TARJETAS */
+/* CARDS */
 .card {
-  background: linear-gradient(145deg, #ffffff20, #ffffff10);
-  border: 1px solid rgba(255,255,255,0.2);
   padding: 12px;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: 0.2s;
-  backdrop-filter: blur(6px);
 }
 
 .card:hover {
-  transform: scale(1.06);
-  background: rgba(255,255,255,0.25);
+  transform: translateY(-3px);
 }
 
 .titulo {
@@ -67,7 +135,6 @@ h1 {
 
 .compositor {
   font-size: 12px;
-  color: #e0e0e0;
   margin-top: 4px;
 }
 
@@ -80,7 +147,6 @@ h1 {
 iframe {
   width: 100%;
   height: 100%;
-  border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   background: white;
 }
