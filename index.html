@@ -1,41 +1,171 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
   <meta charset="UTF-8">
   <title>Biblioteca de Partituras</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      background: #f4f6f9;
+      color: #333;
+    }
+
+    header {
+      background: #1e1e2f;
+      color: white;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    #buscador {
+      width: 80%;
+      padding: 12px;
+      margin-top: 15px;
+      border-radius: 8px;
+      border: none;
+      font-size: 16px;
+    }
+
+    .container {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+    }
+
+    .lista {
+      width: 40%;
+      max-height: 80vh;
+      overflow-y: auto;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    .item {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      cursor: pointer;
+    }
+
+    .item:hover {
+      background: #f0f0f0;
+    }
+
+    .titulo {
+      font-weight: bold;
+    }
+
+    .visor {
+      width: 60%;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      padding: 10px;
+    }
+
+    iframe {
+      width: 100%;
+      height: 80vh;
+      border: none;
+      border-radius: 8px;
+    }
+
+    button {
+      margin-top: 5px;
+      padding: 5px 10px;
+      border: none;
+      background: #1e1e2f;
+      color: white;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #343456;
+    }
+  </style>
 </head>
+
 <body>
 
-<h1>🎼 Biblioteca de Partituras</h1>
+<header>
+  <h1>🎼 Biblioteca de Partituras</h1>
+  <input type="text" id="buscador" placeholder="Buscar por título o compositor...">
+</header>
 
-<input type="text" id="buscador" placeholder="Buscar por título o compositor">
+<div class="container">
 
-<ul id="resultados"></ul>
+  <!-- LISTA -->
+  <div class="lista" id="lista"></div>
+
+  <!-- VISOR -->
+  <div class="visor">
+    <iframe id="pdfFrame"></iframe>
+  </div>
+
+</div>
 
 <script>
 let data = [];
 
+// Cargar JSON
 fetch('data.json')
   .then(res => res.json())
-  .then(json => data = json);
+  .then(json => {
+    data = json;
+    mostrar(data);
+  });
 
-document.getElementById('buscador').addEventListener('input', function() {
+// Mostrar lista
+function mostrar(lista) {
+  let cont = document.getElementById("lista");
+  cont.innerHTML = "";
+
+  lista.forEach(p => {
+    let div = document.createElement("div");
+    div.className = "item";
+
+    div.innerHTML = `
+      <div class="titulo">${p.titulo}</div>
+      <div>${p.compositor}</div>
+      <button onclick="verPDF('${p.url}')">Ver PDF</button>
+    `;
+
+    cont.appendChild(div);
+  });
+}
+
+// Buscador
+document.getElementById("buscador").addEventListener("input", function() {
   let valor = this.value.toLowerCase();
 
-  let resultados = data.filter(p =>
+  let filtrado = data.filter(p =>
     p.titulo.toLowerCase().includes(valor) ||
     p.compositor.toLowerCase().includes(valor)
   );
 
-  let lista = document.getElementById('resultados');
-  lista.innerHTML = '';
-
-  resultados.forEach(p => {
-    let li = document.createElement('li');
-    li.innerHTML = `<a href="${p.url}" target="_blank">${p.titulo} - ${p.compositor}</a>`;
-    lista.appendChild(li);
-  });
+  mostrar(filtrado);
 });
+
+// Visor PDF
+function verPDF(url) {
+  let match = url.match(/\/d\/(.*?)\//);
+
+  if (match) {
+    document.getElementById("pdfFrame").src =
+      "https://drive.google.com/file/d/" + match[1] + "/preview";
+  } else {
+    document.getElementById("pdfFrame").src = url;
+  }
+}
 </script>
 
 </body>
