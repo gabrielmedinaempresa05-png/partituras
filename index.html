@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Biblioteca de Partituras</title>
 
-<link rel="stylesheet" href="estilos.css">
+<link rel="stylesheet" href="styles.css">
 </head>
 
 <body data-theme="light">
@@ -50,12 +50,9 @@ function render(lista) {
     let div = document.createElement("div");
     div.className = "card";
 
-    let c1 = stringToColor(p.titulo);
-    let c2 = stringToColor(p.compositor || "x");
-
     div.innerHTML = `
-      <div class="cover" style="background: linear-gradient(135deg, ${c1}, ${c2})">
-        <div class="cover-title">${p.titulo}</div>
+      <div class="cover">
+        🎼
       </div>
 
       <div class="info">
@@ -113,22 +110,6 @@ btn.onclick = () => {
   let current = document.body.getAttribute("data-theme");
   setTheme(current === "dark" ? "light" : "dark");
 };
-
-/* COLOR ALEATORIO ESTABLE */
-function stringToColor(str) {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    hash = str.charCodeAt(i) + ((hash << 5) - hash);
-  }
-
-  let color = "#";
-  for (let i = 0; i < 3; i++) {
-    let value = (hash >> (i * 8)) & 255;
-    color += ("00" + value.toString(16)).substr(-2);
-  }
-
-  return color;
-}
 </script>
 
 </body>
