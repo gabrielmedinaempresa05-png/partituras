@@ -46,7 +46,7 @@ function render(lista) {
 
     div.innerHTML = `
       <div class="titulo">${p.titulo}</div>
-      <div class="compositor">${p.compositor || ""}</div>
+      <div class="compositor">${p.compositor ? p.compositor : ""}</div>
     `;
 
     div.onclick = () => verPDF(p.url);
