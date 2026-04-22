@@ -19,10 +19,8 @@
 
 <div class="container">
 
-  <!-- GRID -->
   <div class="grid" id="grid"></div>
 
-  <!-- VISOR -->
   <div class="visor">
     <iframe id="pdfFrame"></iframe>
   </div>
@@ -32,31 +30,30 @@
 <script>
 let data = [];
 
-/* CARGAR JSON */
-fetch('data.json')
+/* CARGA JSON */
+fetch('data.json?v=2')
   .then(res => res.json())
   .then(json => {
     data = json;
     render(data);
-  });
+  })
+  .catch(err => console.log("ERROR JSON:", err));
 
 /* RENDER */
 function render(lista) {
-  let grid = document.getElementById("grid");
+  const grid = document.getElementById("grid");
   grid.innerHTML = "";
 
   lista.forEach(p => {
 
-    let div = document.createElement("div");
+    const div = document.createElement("div");
     div.className = "card";
 
     div.innerHTML = `
-      <div class="cover">
-        🎼
-      </div>
+      <div class="cover">🎼</div>
 
       <div class="info">
-        <div class="titulo">${p.titulo}</div>
+        <div class="titulo">${p.titulo || ""}</div>
         <div class="compositor">${p.compositor || ""}</div>
       </div>
     `;
@@ -71,40 +68,35 @@ function render(lista) {
 document.getElementById("buscador").addEventListener("input", function() {
   let v = this.value.toLowerCase();
 
-  let filtrado = data.filter(p =>
-    p.titulo.toLowerCase().includes(v) ||
+  render(data.filter(p =>
+    (p.titulo || "").toLowerCase().includes(v) ||
     (p.compositor || "").toLowerCase().includes(v)
-  );
-
-  render(filtrado);
+  ));
 });
 
-/* VISOR PDF */
+/* VISOR */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
   if (match) {
     document.getElementById("pdfFrame").src =
       "https://drive.google.com/file/d/" + match[1] + "/preview";
-  } else {
-    document.getElementById("pdfFrame").src = url;
   }
 }
 
 /* TEMA */
 const btn = document.getElementById("themeToggle");
 
-function setTheme(theme) {
-  document.body.setAttribute("data-theme", theme);
-  localStorage.setItem("theme", theme);
+function setTheme(t) {
+  document.body.setAttribute("data-theme", t);
+  localStorage.setItem("theme", t);
 
-  btn.textContent = theme === "dark"
+  btn.textContent = t === "dark"
     ? "☀️ Modo claro"
     : "🌙 Modo oscuro";
 }
 
-let saved = localStorage.getItem("theme") || "light";
-setTheme(saved);
+setTheme(localStorage.getItem("theme") || "light");
 
 btn.onclick = () => {
   let current = document.body.getAttribute("data-theme");
