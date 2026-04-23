@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <title>Biblioteca de Partituras</title>
+
 <link rel="stylesheet" href="estilos.css">
 </head>
 
@@ -10,21 +11,15 @@
 
 <header>
   <h1>🎼 Biblioteca de Partituras</h1>
-  <input type="text" id="buscador" placeholder="Buscar...">
+  <input type="text" id="buscador" placeholder="Buscar partituras...">
 </header>
 
 <div class="container">
 
-  <!-- 📂 SIDEBAR -->
-  <div class="sidebar" id="sidebar"></div>
+  <!-- GRID -->
+  <div class="grid" id="grid"></div>
 
-  <!-- 📄 CONTENIDO -->
-  <div class="contenido">
-    <div class="grid" id="grid"></div>
-    <button id="cargarMas">Cargar más</button>
-  </div>
-
-  <!-- 📑 VISOR -->
+  <!-- VISOR -->
   <div class="visor">
     <iframe id="pdfFrame"></iframe>
   </div>
@@ -33,105 +28,24 @@
 
 <script>
 let data = [];
-let filtrado = [];
-let pagina = 0;
-const porPagina = 40;
-let carpetaActual = null;
 
-/* 📦 CARGA */
 fetch('data.json')
-  .then(res => {
-    if (!res.ok) throw new Error("No carga JSON");
-    return res.json();
-  })
+  .then(res => res.json())
   .then(json => {
-    console.log("JSON cargado:", json.length);
-
     data = json;
-
-    crearCarpetas();
-    aplicarFiltro();
-  })
-  .catch(err => {
-    console.error("ERROR:", err);
-    document.getElementById("grid").innerHTML = "Error cargando datos";
+    render(data);
   });
 
-/* 📂 CREAR SIDEBAR */
-function crearCarpetas() {
-  let sidebar = document.getElementById("sidebar");
-
-  let carpetas = [...new Set(data.map(p => p.carpeta || "General"))];
-
-  sidebar.innerHTML = "";
-
-  let todas = document.createElement("div");
-  todas.textContent = "📁 Todas";
-  todas.onclick = () => seleccionarCarpeta(null);
-  sidebar.appendChild(todas);
-
-  carpetas.forEach(c => {
-    let div = document.createElement("div");
-    div.textContent = "📁 " + c;
-    div.onclick = () => seleccionarCarpeta(c);
-    sidebar.appendChild(div);
-  });
-}
-
-/* 📂 SELECCIONAR CARPETA */
-function seleccionarCarpeta(carpeta) {
-  carpetaActual = carpeta;
-  pagina = 0;
-  aplicarFiltro();
-}
-
-/* 🔎 BUSCADOR */
-document.getElementById("buscador").addEventListener("input", () => {
-  pagina = 0;
-  aplicarFiltro();
-});
-
-/* 🔎 FILTRAR (CORREGIDO) */
-function aplicarFiltro() {
-  let texto = document.getElementById("buscador").value.toLowerCase();
-
-  filtrado = data.filter(p => {
-
-    let titulo = (p.titulo || "").toLowerCase();
-    let comp = (p.compositor || "").toLowerCase();
-    let carpeta = (p.carpeta || "");
-
-    let matchTexto = (titulo + " " + comp).includes(texto);
-    let matchCarpeta = !carpetaActual || carpeta === carpetaActual;
-
-    return matchTexto && matchCarpeta;
-  });
-
-  console.log("Filtrado:", filtrado.length);
-
-  render();
-}
-
-/* 🎨 RENDER (MEJORADO) */
-function render() {
+function render(lista) {
   let grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
-  if (pagina === 0) grid.innerHTML = "";
-
-  if (filtrado.length === 0) {
-    grid.innerHTML = "<p>No hay resultados</p>";
-    return;
-  }
-
-  let inicio = pagina * porPagina;
-  let fin = inicio + porPagina;
-
-  filtrado.slice(inicio, fin).forEach(p => {
+  lista.forEach(p => {
     let div = document.createElement("div");
     div.className = "card";
 
     div.innerHTML = `
-      <div class="titulo">${p.titulo || "Sin título"}</div>
+      <div class="titulo">${p.titulo}</div>
       <div class="compositor">${p.compositor || ""}</div>
     `;
 
@@ -141,13 +55,19 @@ function render() {
   });
 }
 
-/* ➕ CARGAR MÁS */
-document.getElementById("cargarMas").onclick = () => {
-  pagina++;
-  render();
-};
+/* BUSCADOR */
+document.getElementById("buscador").addEventListener("input", function() {
+  let v = this.value.toLowerCase();
 
-/* 📑 VISOR PDF */
+  let filtrado = data.filter(p =>
+    p.titulo.toLowerCase().includes(v) ||
+    (p.compositor || "").toLowerCase().includes(v)
+  );
+
+  render(filtrado);
+});
+
+/* VISOR PDF */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
