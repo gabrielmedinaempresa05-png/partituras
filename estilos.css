@@ -1,123 +1,260 @@
 /* =========================
-   SIDEBAR (CARPETAS)
+BASE GENERAL
+========================= */
+body {
+margin: 0;
+font-family: "Segoe UI", Arial, sans-serif;
+background: #f4f5f7;
+color: #1a1a1a;
+}
+
+/* =========================
+HEADER
+========================= */
+header {
+padding: 18px;
+text-align: center;
+background: #ffffff;
+border-bottom: 1px solid #e6e6e6;
+
+position: sticky;
+top: 0;
+z-index: 10;
+}
+
+h1 {
+margin: 0;
+font-size: 24px;
+color: #222;
+}
+
+/* BUSCADOR */
+#buscador {
+margin-top: 10px;
+width: 60%;
+padding: 12px 14px;
+
+border-radius: 10px;
+border: 1px solid #ddd;
+
+font-size: 15px;
+outline: none;
+
+transition: 0.2s;
+background: #fafafa;
+}
+
+#buscador:focus {
+border-color: #999;
+background: #fff;
+box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+/* =========================
+LAYOUT
+========================= */
+.container {
+display: flex;
+height: calc(100vh - 120px);
+}
+
+/* =========================
+SIDEBAR (CARPETAS)
 ========================= */
 .sidebar {
-  width: 220px;
-  background: #ffffff;
-  border-right: 1px solid #e6e6e6;
-  padding: 10px;
-  overflow-y: auto;
+width: 220px;
+background: #ffffff;
+border-right: 1px solid #e6e6e6;
+padding: 10px;
+overflow-y: auto;
 }
 
 .sidebar div {
-  padding: 8px 10px;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 14px;
-  transition: 0.2s;
+padding: 8px 10px;
+border-radius: 8px;
+cursor: pointer;
+font-size: 14px;
+transition: 0.2s;
 }
 
 .sidebar div:hover {
-  background: #f0f1f3;
+background: #f0f1f3;
 }
 
-/* carpeta seleccionada */
 .sidebar .activa {
-  background: #e6e8ec;
-  font-weight: 600;
+background: #e6e8ec;
+font-weight: 600;
 }
 
 /* =========================
-   CONTENIDO CENTRAL
+CONTENIDO CENTRAL
 ========================= */
 .contenido {
-  width: 55%;
-  display: flex;
-  flex-direction: column;
+width: 55%;
+display: flex;
+flex-direction: column;
 }
 
-/* ajusta grid dentro */
 .contenido .grid {
-  width: 100%;
-  flex: 1;
+width: 100%;
+flex: 1;
 }
 
 /* =========================
-   BOTÓN CARGAR MÁS
+GRID
+========================= */
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+gap: 16px;
+
+padding: 16px;
+overflow-y: auto;
+}
+
+/* =========================
+CARD
+========================= */
+.card {
+background: #ffffff;
+border: 1px solid #eaeaea;
+border-radius: 12px;
+
+padding: 14px;
+cursor: pointer;
+
+transition: all 0.25s ease;
+box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+
+animation: fadeIn 0.3s ease;
+}
+
+.card:hover {
+transform: translateY(-6px);
+box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+border-color: #d0d0d0;
+}
+
+@keyframes fadeIn {
+from {
+opacity: 0;
+transform: translateY(10px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+/* =========================
+TEXTO
+========================= */
+.titulo {
+font-size: 14px;
+font-weight: 600;
+color: #1f1f1f;
+margin-bottom: 6px;
+}
+
+.compositor {
+font-size: 12px;
+color: #777;
+font-style: italic;
+}
+
+/* =========================
+BOTÓN CARGAR MÁS
 ========================= */
 #cargarMas {
-  margin: 10px auto;
-  padding: 10px 16px;
+margin: 10px auto;
+padding: 10px 16px;
 
-  border: none;
-  border-radius: 10px;
+border: none;
+border-radius: 10px;
 
-  background: #222;
-  color: white;
+background: #222;
+color: white;
 
-  cursor: pointer;
-  font-size: 14px;
+cursor: pointer;
+font-size: 14px;
 
-  transition: 0.2s;
+transition: 0.2s;
 }
 
 #cargarMas:hover {
-  background: #000;
-  transform: translateY(-2px);
+background: #000;
+transform: translateY(-2px);
 }
 
 /* =========================
-   SCROLL GENERAL (mejora)
+VISOR PDF
+========================= */
+.visor {
+width: 25%;
+padding: 10px;
+background: #f0f1f3;
+}
+
+iframe {
+width: 100%;
+height: 100%;
+border: none;
+border-radius: 10px;
+background: white;
+}
+
+/* =========================
+SCROLL GENERAL
 ========================= */
 .sidebar::-webkit-scrollbar,
 .grid::-webkit-scrollbar {
-  width: 8px;
+width: 8px;
 }
 
 .sidebar::-webkit-scrollbar-thumb,
 .grid::-webkit-scrollbar-thumb {
-  background: #ccc;
-  border-radius: 10px;
+background: #ccc;
+border-radius: 10px;
 }
 
 .sidebar::-webkit-scrollbar-thumb:hover,
 .grid::-webkit-scrollbar-thumb:hover {
-  background: #aaa;
+background: #aaa;
 }
 
 /* =========================
-   RESPONSIVE (MUY IMPORTANTE)
+RESPONSIVE
 ========================= */
 @media (max-width: 900px) {
 
-  .container {
-    flex-direction: column;
-  }
+.container {
+flex-direction: column;
+}
 
-  .sidebar {
-    width: 100%;
-    height: 120px;
-    display: flex;
-    overflow-x: auto;
-    border-right: none;
-    border-bottom: 1px solid #e6e6e6;
-  }
+.sidebar {
+width: 100%;
+height: 120px;
+display: flex;
+overflow-x: auto;
+border-right: none;
+border-bottom: 1px solid #e6e6e6;
+}
 
-  .sidebar div {
-    white-space: nowrap;
-    margin-right: 8px;
-  }
+.sidebar div {
+white-space: nowrap;
+margin-right: 8px;
+}
 
-  .contenido {
-    width: 100%;
-  }
+.contenido {
+width: 100%;
+}
 
-  .grid {
-    width: 100%;
-  }
+.grid {
+width: 100%;
+}
 
-  .visor {
-    width: 100%;
-    height: 300px;
-  }
+.visor {
+width: 100%;
+height: 300px;
+}
 }
