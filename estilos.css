@@ -1,279 +1,165 @@
 /* =========================
-BASE GENERAL
+   BASE GENERAL
 ========================= */
 body {
-margin: 0;
-font-family: "Segoe UI", Arial, sans-serif;
-background: #f4f5f7;
-color: #1a1a1a;
+  margin: 0;
+  font-family: "Segoe UI", Arial, sans-serif;
+  background: #f4f5f7;
+  color: #1a1a1a;
 }
 
 /* =========================
-HEADER
+   HEADER
 ========================= */
 header {
-padding: 18px;
-text-align: center;
-background: #ffffff;
-border-bottom: 1px solid #e6e6e6;
-
-position: sticky;
-top: 0;
-z-index: 10;
+  padding: 18px;
+  text-align: center;
+  background: #ffffff;
+  border-bottom: 1px solid #e6e6e6;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 h1 {
-margin: 0;
-font-size: 24px;
-color: #222;
+  margin: 0;
+  font-size: 24px;
 }
 
-/* BUSCADOR */
 #buscador {
-margin-top: 10px;
-width: 60%;
-padding: 12px 14px;
-
-border-radius: 10px;
-border: 1px solid #ddd;
-
-font-size: 15px;
-outline: none;
-
-transition: 0.2s;
-background: #fafafa;
-}
-
-#buscador:focus {
-border-color: #999;
-background: #fff;
-box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+  margin-top: 10px;
+  width: 60%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  font-size: 15px;
 }
 
 /* =========================
-LAYOUT
+   LAYOUT
 ========================= */
 .container {
-display: flex;
-height: calc(100vh - 120px);
+  display: flex;
+  height: calc(100vh - 110px);
 }
 
 /* =========================
-SIDEBAR (NUEVO)
-========================= */
-.sidebar {
-width: 220px;
-background: #ffffff;
-border-right: 1px solid #e6e6e6;
-padding: 10px;
-overflow-y: auto;
-}
-
-.sidebar div {
-padding: 8px 10px;
-border-radius: 8px;
-cursor: pointer;
-font-size: 14px;
-transition: 0.2s;
-}
-
-.sidebar div:hover {
-background: #f0f1f3;
-}
-
-.sidebar .activa {
-background: #e6e8ec;
-font-weight: 600;
-}
-
-/* =========================
-CONTENIDO (NUEVO)
+   CONTENIDO (IZQUIERDA)
 ========================= */
 .contenido {
-width: 35%;
-display: flex;
-flex-direction: column;
-}
-
-.contenido .grid {
-width: 100%;
-flex: 1;
+  width: 55%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* =========================
-GRID
+   GRID
 ========================= */
 .grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-gap: 16px;
-
-padding: 16px;
-overflow-y: auto;
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  padding: 16px;
+  overflow-y: auto;
 }
 
 /* =========================
-CARD
+   CARD
 ========================= */
 .card {
-background: #ffffff;
-border: 1px solid #eaeaea;
-border-radius: 12px;
-
-padding: 14px;
-cursor: pointer;
-
-transition: all 0.25s ease;
-box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-
-animation: fadeIn 0.3s ease;
+  background: white;
+  border-radius: 12px;
+  padding: 14px;
+  cursor: pointer;
+  border: 1px solid #eaeaea;
+  transition: 0.2s;
 }
 
 .card:hover {
-transform: translateY(-6px);
-box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-border-color: #d0d0d0;
+  transform: translateY(-4px);
+  box-shadow: 0 6px 15px rgba(0,0,0,0.08);
 }
 
-@keyframes fadeIn {
-from {
-opacity: 0;
-transform: translateY(10px);
-}
-to {
-opacity: 1;
-transform: translateY(0);
-}
+/* seleccionada */
+.card.activo {
+  border: 2px solid #000;
+  background: #f8f8f8;
 }
 
 /* =========================
-TEXTO
+   TEXTO
 ========================= */
 .titulo {
-font-size: 14px;
-font-weight: 600;
-color: #1f1f1f;
-margin-bottom: 6px;
-}
-
-.card:hover .titulo {
-color: #000;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .compositor {
-font-size: 12px;
-color: #777;
-font-style: italic;
+  font-size: 12px;
+  color: #777;
 }
 
 /* =========================
-BOTÓN CARGAR MÁS (NUEVO)
+   BOTÓN
 ========================= */
 #cargarMas {
-margin: 10px auto;
-padding: 10px 16px;
-
-border: none;
-border-radius: 10px;
-
-background: #222;
-color: white;
-
-cursor: pointer;
-font-size: 14px;
-
-transition: 0.2s;
+  margin: 10px auto;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: none;
+  background: black;
+  color: white;
+  cursor: pointer;
 }
 
 #cargarMas:hover {
-background: #000;
-transform: translateY(-2px);
+  background: #333;
 }
 
 /* =========================
-VISOR PDF
+   VISOR
 ========================= */
 .visor {
-width: 40%;
-padding: 10px;
-background: #f0f1f3;
-}
-
-iframe {
-width: 100%;
-height: 100%;
-border: none;
-border-radius: 10px;
-background: white;
-}
-
-/* =========================
-SCROLL
-========================= */
-.sidebar::-webkit-scrollbar,
-.grid::-webkit-scrollbar {
-width: 8px;
-}
-
-.sidebar::-webkit-scrollbar-thumb,
-.grid::-webkit-scrollbar-thumb {
-background: #ccc;
-border-radius: 10px;
-}
-
-.sidebar::-webkit-scrollbar-thumb:hover,
-.grid::-webkit-scrollbar-thumb:hover {
-background: #aaa;
-}
-
-/* =========================
-RESPONSIVE
-========================= */
-@media (max-width: 900px) {
-
-.container {
-flex-direction: column;
-}
-
-.sidebar {
-width: 100%;
-height: 120px;
-display: flex;
-overflow-x: auto;
-border-right: none;
-border-bottom: 1px solid #e6e6e6;
-}
-
-.sidebar div {
-white-space: nowrap;
-margin-right: 8px;
-}
-
-.contenido {
-width: 100%;
-}
-
-.grid {
-width: 100%;
-}
-
-.visor {
-width: 100%;
-height: 300px;
-}
-}
-/* CARPETAS TIPO DRIVE */
-.folder-header {
-  cursor: pointer;
-  padding: 6px 8px;
-  border-radius: 6px;
-  font-size: 14px;
-}
-
-.folder-header:hover {
+  width: 45%;
+  padding: 10px;
   background: #f0f1f3;
 }
 
-.folder-children {
-  margin-left: 12px;
+iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 10px;
+  background: white;
+}
+
+/* =========================
+   SCROLL
+========================= */
+.grid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.grid::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 10px;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+  .container {
+    flex-direction: column;
+  }
+
+  .contenido,
+  .visor {
+    width: 100%;
+  }
+
+  .visor {
+    height: 300px;
+  }
 }
