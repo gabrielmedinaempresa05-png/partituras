@@ -146,14 +146,17 @@ function aplicarFiltro() {
 
   filtrado = data.filter(p => {
 
-    let titulo = (p.titulo || "").toLowerCase();
-    let comp = (p.compositor || "").toLowerCase();
-    let carpeta = p.carpeta || "";
+    let matchTexto = true;
 
-    let matchTexto = (titulo + " " + comp).includes(texto);
+    // 🔥 SOLO filtra si hay texto
+    if (texto !== "") {
+      matchTexto = (p.titulo + " " + p.compositor)
+        .toLowerCase()
+        .includes(texto);
+    }
 
     let matchCarpeta =
-      !carpetaActual || carpeta.startsWith(carpetaActual);
+      !carpetaActual || p.carpeta === carpetaActual;
 
     return matchTexto && matchCarpeta;
   });
