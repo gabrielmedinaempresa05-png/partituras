@@ -40,11 +40,21 @@ let carpetaActual = null;
 
 /* 📦 CARGA */
 fetch('./data.json')
-  .then(res => res.json())
+  .then(res => {
+    if (!res.ok) throw new Error("No carga JSON");
+    return res.json();
+  })
   .then(json => {
+    console.log("JSON cargado:", json.length);
+
     data = json;
+
     crearCarpetas();
     aplicarFiltro();
+  })
+  .catch(err => {
+    console.error("ERROR:", err);
+    document.getElementById("grid").innerHTML = "Error cargando datos";
   });
 
 /* 📂 CREAR SIDEBAR */
@@ -53,7 +63,12 @@ function crearCarpetas() {
 
   let carpetas = [...new Set(data.map(p => p.carpeta || "General"))];
 
-  sidebar.innerHTML = "<div onclick='seleccionarCarpeta(null)'>📁 Todas</div>";
+  sidebar.innerHTML = "";
+
+  let todas = document.createElement("div");
+  todas.textContent = "📁 Todas";
+  todas.onclick = () => seleccionarCarpeta(null);
+  sidebar.appendChild(todas);
 
   carpetas.forEach(c => {
     let div = document.createElement("div");
@@ -76,28 +91,37 @@ document.getElementById("buscador").addEventListener("input", () => {
   aplicarFiltro();
 });
 
-/* 🔎 FILTRAR */
+/* 🔎 FILTRAR (CORREGIDO) */
 function aplicarFiltro() {
   let texto = document.getElementById("buscador").value.toLowerCase();
 
   filtrado = data.filter(p => {
-    let matchTexto =
-      (p.titulo + " " + p.compositor).toLowerCase().includes(texto);
 
-    let matchCarpeta =
-      !carpetaActual || p.carpeta === carpetaActual;
+    let titulo = (p.titulo || "").toLowerCase();
+    let comp = (p.compositor || "").toLowerCase();
+    let carpeta = (p.carpeta || "");
+
+    let matchTexto = (titulo + " " + comp).includes(texto);
+    let matchCarpeta = !carpetaActual || carpeta === carpetaActual;
 
     return matchTexto && matchCarpeta;
   });
 
+  console.log("Filtrado:", filtrado.length);
+
   render();
 }
 
-/* 🎨 RENDER */
+/* 🎨 RENDER (MEJORADO) */
 function render() {
   let grid = document.getElementById("grid");
 
   if (pagina === 0) grid.innerHTML = "";
+
+  if (filtrado.length === 0) {
+    grid.innerHTML = "<p>No hay resultados</p>";
+    return;
+  }
 
   let inicio = pagina * porPagina;
   let fin = inicio + porPagina;
@@ -107,7 +131,7 @@ function render() {
     div.className = "card";
 
     div.innerHTML = `
-      <div class="titulo">${p.titulo}</div>
+      <div class="titulo">${p.titulo || "Sin título"}</div>
       <div class="compositor">${p.compositor || ""}</div>
     `;
 
