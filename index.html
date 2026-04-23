@@ -39,7 +39,7 @@ const porPagina = 40;
 let carpetaActual = null;
 
 /* 📦 CARGA */
-fetch('data.json')
+fetch('./data.json')
   .then(res => res.json())
   .then(json => {
     data = json;
