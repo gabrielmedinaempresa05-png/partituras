@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Biblioteca de Partituras</title>
-
 <link rel="stylesheet" href="estilos.css">
 </head>
 
@@ -16,10 +15,13 @@
 
 <div class="container">
 
-  <!-- GRID -->
-  <div class="grid" id="grid"></div>
+  <!-- 📄 LISTA -->
+  <div class="contenido">
+    <div class="grid" id="grid"></div>
+    <button id="cargarMas">Cargar más</button>
+  </div>
 
-  <!-- VISOR -->
+  <!-- 📑 VISOR -->
   <div class="visor">
     <iframe id="pdfFrame"></iframe>
   </div>
@@ -31,107 +33,23 @@ let data = [];
 let filtrado = [];
 let pagina = 0;
 const porPagina = 40;
-let carpetaActual = null;
 
 /* =========================
-   📦 CARGA JSON
+   CARGA JSON
 ========================= */
-fetch('https://gabrielmedinaempresa05-png.github.io/partituras/data.json')
+fetch('./data.json')
   .then(res => res.json())
   .then(json => {
     data = json;
-    crearArbol();
     aplicarFiltro();
+  })
+  .catch(err => {
+    console.error(err);
+    document.getElementById("grid").innerHTML = "Error cargando datos";
   });
 
 /* =========================
-   🌳 CREAR ÁRBOL REAL
-========================= */
-function crearArbol() {
-  const sidebar = document.getElementById("sidebar");
-  sidebar.innerHTML = "";
-
-  let arbol = {};
-
-  // construir árbol por rutas completas
-  data.forEach(p => {
-    let ruta = (p.carpeta || "General").split("/");
-
-    let nivel = arbol;
-    let path = "";
-
-    ruta.forEach(parte => {
-      path = path ? path + "/" + parte : parte;
-
-      if (!nivel[parte]) {
-        nivel[parte] = {
-          _path: path,
-          _children: {}
-        };
-      }
-
-      nivel = nivel[parte]._children;
-    });
-  });
-
-  // render recursivo
-  function renderNodo(nodo, contenedor) {
-    Object.keys(nodo).sort().forEach(nombre => {
-
-      let item = nodo[nombre];
-
-      let div = document.createElement("div");
-      div.className = "folder";
-
-      let header = document.createElement("div");
-      header.className = "folder-header";
-      header.innerHTML = "▶ 📁 " + nombre;
-
-      let hijos = document.createElement("div");
-      hijos.className = "folder-children";
-      hijos.style.display = "none";
-
-      header.onclick = (e) => {
-        e.stopPropagation();
-
-        let abierto = hijos.style.display === "block";
-        hijos.style.display = abierto ? "none" : "block";
-
-        header.innerHTML = (abierto ? "▶" : "▼") + " 📁 " + nombre;
-
-        seleccionarCarpeta(item._path);
-      };
-
-      div.appendChild(header);
-      div.appendChild(hijos);
-      contenedor.appendChild(div);
-
-      renderNodo(item._children, hijos);
-    });
-  }
-
-  // botón "todas"
-  let todas = document.createElement("div");
-  todas.className = "folder-header";
-  todas.innerHTML = "📁 Todas";
-  todas.onclick = () => seleccionarCarpeta(null);
-
-  sidebar.appendChild(todas);
-
-  renderNodo(arbol, sidebar);
-}
-
-/* =========================
-   📂 SELECCIÓN REAL
-========================= */
-function seleccionarCarpeta(path) {
-  carpetaActual = path;
-  pagina = 0;
-  aplicarFiltro();
-}
-
-/* =========================
-   🔎 BUSCADOR
+   BUSCADOR
 ========================= */
 document.getElementById("buscador").addEventListener("input", () => {
   pagina = 0;
@@ -139,64 +57,64 @@ document.getElementById("buscador").addEventListener("input", () => {
 });
 
 /* =========================
-   🔎 FILTRO CORRECTO
+   FILTRO
 ========================= */
 function aplicarFiltro() {
   let texto = document.getElementById("buscador").value.toLowerCase();
 
   filtrado = data.filter(p => {
+    if (!texto) return true;
 
-    let matchTexto = true;
-
-    // 🔥 SOLO filtra si hay texto
-    if (texto !== "") {
-      matchTexto = (p.titulo + " " + p.compositor)
-        .toLowerCase()
-        .includes(texto);
-    }
-
-    let matchCarpeta =
-      !carpetaActual || p.carpeta === carpetaActual;
-
-    return matchTexto && matchCarpeta;
+    return (p.titulo + " " + p.compositor)
+      .toLowerCase()
+      .includes(texto);
   });
 
   render();
 }
 
 /* =========================
-   🎨 RENDER
+   RENDER
 ========================= */
 function render() {
   let grid = document.getElementById("grid");
 
   if (pagina === 0) grid.innerHTML = "";
 
-  if (filtrado.length === 0) {
-    grid.innerHTML = "<p>No hay resultados</p>";
-    return;
-  }
-
   let inicio = pagina * porPagina;
   let fin = inicio + porPagina;
 
-  filtrado.slice(inicio, fin).forEach(p => {
+  filtrado.slice(inicio, fin).forEach((p, i) => {
     let div = document.createElement("div");
     div.className = "card";
 
+    // 🔥 marcar el primero
+    if (i === 0 && pagina === 0) {
+      div.classList.add("activo");
+    }
+
     div.innerHTML = `
-      <div class="titulo">${p.titulo || "Sin título"}</div>
+      <div class="titulo">${p.titulo}</div>
       <div class="compositor">${p.compositor || ""}</div>
     `;
 
-    div.onclick = () => verPDF(p.url);
+    div.onclick = () => {
+      document.querySelectorAll(".card").forEach(c => c.classList.remove("activo"));
+      div.classList.add("activo");
+      verPDF(p.url);
+    };
 
     grid.appendChild(div);
   });
+
+  // 🔥 auto abrir el primero del filtro
+  if (filtrado.length > 0 && pagina === 0) {
+    verPDF(filtrado[0].url);
+  }
 }
 
 /* =========================
-   ➕ PAGINACIÓN
+   CARGAR MÁS
 ========================= */
 document.getElementById("cargarMas").onclick = () => {
   pagina++;
@@ -204,7 +122,7 @@ document.getElementById("cargarMas").onclick = () => {
 };
 
 /* =========================
-   📑 VISOR PDF
+   VISOR PDF
 ========================= */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
@@ -217,7 +135,6 @@ function verPDF(url) {
   }
 }
 </script>
-
 
 </body>
 </html>
