@@ -16,6 +16,9 @@
 
 <div class="container">
 
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar"></div>
+
   <!-- GRID -->
   <div class="grid" id="grid"></div>
 
@@ -28,14 +31,70 @@
 
 <script>
 let data = [];
+let estructura = {};
 
 fetch('data.json')
   .then(res => res.json())
   .then(json => {
     data = json;
+
+    construirEstructura();
+    renderCarpetas();
     render(data);
   });
 
+/* 📁 CONSTRUIR ÁRBOL DE CARPETAS */
+function construirEstructura() {
+  estructura = {};
+
+  data.forEach(p => {
+    let ruta = p.carpeta || "";
+    let partes = ruta.split("/").filter(x => x);
+
+    let nivel = estructura;
+
+    partes.forEach(parte => {
+      if (!nivel[parte]) nivel[parte] = {};
+      nivel = nivel[parte];
+    });
+  });
+}
+
+/* 📁 RENDER SIDEBAR */
+function renderCarpetas() {
+  let sidebar = document.getElementById("sidebar");
+  sidebar.innerHTML = "<h3>📂 Carpetas</h3>";
+
+  function crearLista(obj, ruta = "") {
+    let ul = document.createElement("ul");
+
+    for (let key in obj) {
+      let li = document.createElement("li");
+      li.textContent = key;
+
+      let nuevaRuta = ruta + "/" + key;
+
+      li.onclick = (e) => {
+        e.stopPropagation();
+
+        let filtrado = data.filter(p =>
+          (p.carpeta || "").startsWith(nuevaRuta)
+        );
+
+        render(filtrado);
+      };
+
+      li.appendChild(crearLista(obj[key], nuevaRuta));
+      ul.appendChild(li);
+    }
+
+    return ul;
+  }
+
+  sidebar.appendChild(crearLista(estructura));
+}
+
+/* 🎼 GRID */
 function render(lista) {
   let grid = document.getElementById("grid");
   grid.innerHTML = "";
@@ -55,7 +114,7 @@ function render(lista) {
   });
 }
 
-/* BUSCADOR */
+/* 🔍 BUSCADOR */
 document.getElementById("buscador").addEventListener("input", function() {
   let v = this.value.toLowerCase();
 
@@ -67,7 +126,7 @@ document.getElementById("buscador").addEventListener("input", function() {
   render(filtrado);
 });
 
-/* VISOR PDF */
+/* 📄 VISOR PDF */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
@@ -79,6 +138,5 @@ function verPDF(url) {
   }
 }
 </script>
-
 </body>
 </html>
