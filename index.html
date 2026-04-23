@@ -3,77 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <title>Biblioteca de Partituras</title>
-
 <link rel="stylesheet" href="estilos.css">
-
-<style>
-.container {
-  display: flex;
-}
-
-.sidebar {
-  width: 250px;
-  overflow-y: auto;
-  border-right: 1px solid #ccc;
-  padding: 10px;
-}
-
-.sidebar ul {
-  list-style: none;
-  padding-left: 15px;
-}
-
-.sidebar li {
-  cursor: pointer;
-  margin: 5px 0;
-}
-
-.sidebar li:hover {
-  color: #0077ff;
-}
-
-.grid {
-  flex: 1;
-  display: flex;
-  flex-wrap: wrap;
-  padding: 10px;
-}
-
-.card {
-  width: 180px;
-  padding: 10px;
-  margin: 5px;
-  border: 1px solid #ccc;
-  cursor: pointer;
-}
-
-.visor {
-  width: 40%;
-}
-
-iframe {
-  width: 100%;
-  height: 600px;
-}
-</style>
 </head>
 
 <body>
 
 <header>
   <h1>🎼 Biblioteca de Partituras</h1>
-  <input type="text" id="buscador" placeholder="Buscar partituras...">
+  <input type="text" id="buscador" placeholder="Buscar...">
 </header>
 
 <div class="container">
 
-  <!-- SIDEBAR -->
+  <!-- 📂 SIDEBAR -->
   <div class="sidebar" id="sidebar"></div>
 
-  <!-- GRID -->
-  <div class="grid" id="grid"></div>
+  <!-- 📄 CONTENIDO -->
+  <div class="contenido">
+    <div class="grid" id="grid"></div>
+    <button id="cargarMas">Cargar más</button>
+  </div>
 
-  <!-- VISOR -->
+  <!-- 📑 VISOR -->
   <div class="visor">
     <iframe id="pdfFrame"></iframe>
   </div>
@@ -82,85 +33,76 @@ iframe {
 
 <script>
 let data = [];
-let estructura = {};
+let filtrado = [];
 let pagina = 0;
-let porPagina = 100;
+const porPagina = 40;
+let carpetaActual = null;
 
-/* 🔥 FETCH CORRECTO (TU CASO) */
-fetch('https://gabrielmedinaempresa05-png.github.io/partituras/data.json')
+/* 📦 CARGA */
+fetch('data.json')
   .then(res => res.json())
   .then(json => {
-    console.log("Cargados:", json.length);
-
     data = json;
+    crearCarpetas();
+    aplicarFiltro();
+  });
 
-    construirEstructura();
-    renderCarpetas();
-    render(data);
-  })
-  .catch(err => console.error("Error cargando JSON:", err));
+/* 📂 CREAR SIDEBAR */
+function crearCarpetas() {
+  let sidebar = document.getElementById("sidebar");
 
-/* 📁 CONSTRUIR ÁRBOL */
-function construirEstructura() {
-  estructura = {};
+  let carpetas = [...new Set(data.map(p => p.carpeta || "General"))];
 
-  data.forEach(p => {
-    let ruta = p.carpeta || "Sin categoría";
-    let partes = ruta.split("/").filter(x => x);
+  sidebar.innerHTML = "<div onclick='seleccionarCarpeta(null)'>📁 Todas</div>";
 
-    let nivel = estructura;
-
-    partes.forEach(parte => {
-      if (!nivel[parte]) nivel[parte] = {};
-      nivel = nivel[parte];
-    });
+  carpetas.forEach(c => {
+    let div = document.createElement("div");
+    div.textContent = "📁 " + c;
+    div.onclick = () => seleccionarCarpeta(c);
+    sidebar.appendChild(div);
   });
 }
 
-/* 📁 SIDEBAR */
-function renderCarpetas() {
-  let sidebar = document.getElementById("sidebar");
-  sidebar.innerHTML = "<h3>📂 Carpetas</h3>";
-
-  function crearLista(obj, ruta = "") {
-    let ul = document.createElement("ul");
-
-    for (let key in obj) {
-      let li = document.createElement("li");
-      li.textContent = key;
-
-      let nuevaRuta = ruta ? ruta + "/" + key : key;
-
-      li.onclick = (e) => {
-        e.stopPropagation();
-        pagina = 0;
-
-        let filtrado = data.filter(p =>
-          (p.carpeta || "").startsWith(nuevaRuta)
-        );
-
-        render(filtrado);
-      };
-
-      li.appendChild(crearLista(obj[key], nuevaRuta));
-      ul.appendChild(li);
-    }
-
-    return ul;
-  }
-
-  sidebar.appendChild(crearLista(estructura));
+/* 📂 SELECCIONAR CARPETA */
+function seleccionarCarpeta(carpeta) {
+  carpetaActual = carpeta;
+  pagina = 0;
+  aplicarFiltro();
 }
 
-/* 🎼 GRID OPTIMIZADO */
-function render(lista) {
+/* 🔎 BUSCADOR */
+document.getElementById("buscador").addEventListener("input", () => {
+  pagina = 0;
+  aplicarFiltro();
+});
+
+/* 🔎 FILTRAR */
+function aplicarFiltro() {
+  let texto = document.getElementById("buscador").value.toLowerCase();
+
+  filtrado = data.filter(p => {
+    let matchTexto =
+      (p.titulo + " " + p.compositor).toLowerCase().includes(texto);
+
+    let matchCarpeta =
+      !carpetaActual || p.carpeta === carpetaActual;
+
+    return matchTexto && matchCarpeta;
+  });
+
+  render();
+}
+
+/* 🎨 RENDER */
+function render() {
   let grid = document.getElementById("grid");
-  grid.innerHTML = "";
+
+  if (pagina === 0) grid.innerHTML = "";
 
   let inicio = pagina * porPagina;
   let fin = inicio + porPagina;
 
-  lista.slice(inicio, fin).forEach(p => {
+  filtrado.slice(inicio, fin).forEach(p => {
     let div = document.createElement("div");
     div.className = "card";
 
@@ -175,20 +117,13 @@ function render(lista) {
   });
 }
 
-/* 🔍 BUSCADOR */
-document.getElementById("buscador").addEventListener("input", function() {
-  let v = this.value.toLowerCase();
-  pagina = 0;
+/* ➕ CARGAR MÁS */
+document.getElementById("cargarMas").onclick = () => {
+  pagina++;
+  render();
+};
 
-  let filtrado = data.filter(p =>
-    p.titulo.toLowerCase().includes(v) ||
-    (p.compositor || "").toLowerCase().includes(v)
-  );
-
-  render(filtrado);
-});
-
-/* 📄 VISOR PDF */
+/* 📑 VISOR PDF */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
