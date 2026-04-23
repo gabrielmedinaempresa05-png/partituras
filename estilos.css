@@ -1,169 +1,123 @@
 /* =========================
-   BASE GENERAL
+   SIDEBAR (CARPETAS)
 ========================= */
-body {
-  margin: 0;
-  font-family: "Segoe UI", Arial, sans-serif;
-  background: #f4f5f7;
-  color: #1a1a1a;
-}
-
-/* =========================
-   HEADER
-========================= */
-header {
-  padding: 18px;
-  text-align: center;
+.sidebar {
+  width: 220px;
   background: #ffffff;
-  border-bottom: 1px solid #e6e6e6;
-
-  position: sticky;
-  top: 0;
-  z-index: 10;
-}
-
-h1 {
-  margin: 0;
-  font-size: 24px;
-  color: #222;
-}
-
-/* BUSCADOR */
-#buscador {
-  margin-top: 10px;
-  width: 60%;
-  padding: 12px 14px;
-
-  border-radius: 10px;
-  border: 1px solid #ddd;
-
-  font-size: 15px;
-  outline: none;
-
-  transition: 0.2s;
-  background: #fafafa;
-}
-
-#buscador:focus {
-  border-color: #999;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
-}
-
-/* =========================
-   LAYOUT
-========================= */
-.container {
-  display: flex;
-  height: calc(100vh - 120px);
-}
-
-/* =========================
-   GRID
-========================= */
-.grid {
-  width: 55%;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 16px;
-
-  padding: 16px;
+  border-right: 1px solid #e6e6e6;
+  padding: 10px;
   overflow-y: auto;
 }
 
-/* =========================
-   CARD
-========================= */
-.card {
-  background: #ffffff;
-  border: 1px solid #eaeaea;
-  border-radius: 12px;
-
-  padding: 14px;
+.sidebar div {
+  padding: 8px 10px;
+  border-radius: 8px;
   cursor: pointer;
-
-  transition: all 0.25s ease;
-
-  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+  font-size: 14px;
+  transition: 0.2s;
 }
 
-/* hover elegante */
-.card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.08);
-  border-color: #d0d0d0;
+.sidebar div:hover {
+  background: #f0f1f3;
 }
 
-/* animación entrada */
-.card {
-  animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* carpeta seleccionada */
+.sidebar .activa {
+  background: #e6e8ec;
+  font-weight: 600;
 }
 
 /* =========================
-   TEXTO
+   CONTENIDO CENTRAL
 ========================= */
-.titulo {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1f1f1f;
+.contenido {
+  width: 55%;
+  display: flex;
+  flex-direction: column;
+}
 
-  margin-bottom: 6px;
+/* ajusta grid dentro */
+.contenido .grid {
+  width: 100%;
+  flex: 1;
+}
+
+/* =========================
+   BOTÓN CARGAR MÁS
+========================= */
+#cargarMas {
+  margin: 10px auto;
+  padding: 10px 16px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: #222;
+  color: white;
+
+  cursor: pointer;
+  font-size: 14px;
 
   transition: 0.2s;
 }
 
-.card:hover .titulo {
-  color: #000;
-}
-
-/* autor */
-.compositor {
-  font-size: 12px;
-  color: #777;
-  font-style: italic;
+#cargarMas:hover {
+  background: #000;
+  transform: translateY(-2px);
 }
 
 /* =========================
-   VISOR PDF
+   SCROLL GENERAL (mejora)
 ========================= */
-.visor {
-  width: 45%;
-  padding: 10px;
-  background: #f0f1f3;
-}
-
-iframe {
-  width: 100%;
-  height: 100%;
-  border: none;
-  border-radius: 10px;
-
-  background: white;
-}
-
-/* =========================
-   SCROLL BAR (opcional pro)
-========================= */
+.sidebar::-webkit-scrollbar,
 .grid::-webkit-scrollbar {
   width: 8px;
 }
 
+.sidebar::-webkit-scrollbar-thumb,
 .grid::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 10px;
 }
 
+.sidebar::-webkit-scrollbar-thumb:hover,
 .grid::-webkit-scrollbar-thumb:hover {
   background: #aaa;
+}
+
+/* =========================
+   RESPONSIVE (MUY IMPORTANTE)
+========================= */
+@media (max-width: 900px) {
+
+  .container {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: 120px;
+    display: flex;
+    overflow-x: auto;
+    border-right: none;
+    border-bottom: 1px solid #e6e6e6;
+  }
+
+  .sidebar div {
+    white-space: nowrap;
+    margin-right: 8px;
+  }
+
+  .contenido {
+    width: 100%;
+  }
+
+  .grid {
+    width: 100%;
+  }
+
+  .visor {
+    width: 100%;
+    height: 300px;
+  }
 }
