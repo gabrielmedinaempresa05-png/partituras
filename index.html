@@ -34,146 +34,110 @@
 
 <script>
 let data = [];
-let estructura = { _archivos: [], _sub: {} };
+let estructura = {};
 let rutaActual = [];
+let carpetaActual = null;
 
-/* =========================
-   📦 CARGAR JSON
-========================= */
-fetch('data.json')
+/* 📦 CARGA SEGURA */
+fetch('./data.json?v=' + Date.now())
   .then(res => res.json())
   .then(json => {
     data = json;
     construirEstructura();
-    render();
+    mostrarCarpeta();
   })
   .catch(err => {
     console.error(err);
-    document.getElementById("lista").innerHTML = "Error cargando datos";
+    document.getElementById("grid").innerHTML = "Error cargando datos";
   });
 
-/* =========================
-   🧠 CONSTRUIR ÁRBOL
-========================= */
+/* 🧠 CONSTRUIR ÁRBOL REAL */
 function construirEstructura() {
-  estructura = { _archivos: [], _sub: {} };
+  estructura = {};
 
-  data.forEach(p => {
-    let partes = (p.carpeta || "General").split("/");
+  data.forEach(item => {
+    let partes = (item.carpeta || "General").split("/");
     let nodo = estructura;
 
     partes.forEach(parte => {
-      if (!nodo._sub[parte]) {
-        nodo._sub[parte] = { _archivos: [], _sub: {} };
+      if (!nodo[parte]) {
+        nodo[parte] = {
+          subcarpetas: {},
+          archivos: []
+        };
       }
-      nodo = nodo._sub[parte];
+      nodo = nodo[parte].subcarpetas;
     });
 
-    nodo._archivos.push(p);
+    // meter archivo en la carpeta final
+    let ultima = partes[partes.length - 1];
+    let carpetaPadre = getNodoPadre(partes);
+    carpetaPadre[ultima].archivos.push(item);
   });
 }
 
-/* =========================
-   📂 OBTENER NIVEL ACTUAL
-========================= */
-function getNodoActual() {
+/* 🔍 obtener nodo padre */
+function getNodoPadre(partes) {
   let nodo = estructura;
-
-  for (let r of rutaActual) {
-    if (!nodo._sub[r]) return null;
-    nodo = nodo._sub[r];
+  for (let i = 0; i < partes.length - 1; i++) {
+    nodo = nodo[partes[i]].subcarpetas;
   }
-
   return nodo;
 }
 
-/* =========================
-   🎨 RENDER
-========================= */
-function render() {
-  let cont = document.getElementById("lista");
-  cont.innerHTML = "";
+/* 📂 obtener nodo actual */
+function getNodoActual() {
+  let nodo = estructura;
+  rutaActual.forEach(p => {
+    nodo = nodo[p].subcarpetas;
+  });
+  return nodo;
+}
+
+/* 🎨 MOSTRAR */
+function mostrarCarpeta() {
+  let grid = document.getElementById("grid");
+  grid.innerHTML = "";
 
   let nodo = getNodoActual();
-  if (!nodo) return;
 
-  /* 📁 CARPETAS */
-  Object.keys(nodo._sub).sort().forEach(nombre => {
+  /* 🔙 botón atrás */
+  if (rutaActual.length > 0) {
+    let back = document.createElement("div");
+    back.className = "card carpeta";
+    back.innerHTML = "⬅️ Volver";
+    back.onclick = () => {
+      rutaActual.pop();
+      mostrarCarpeta();
+    };
+    grid.appendChild(back);
+  }
+
+  /* 📁 SUBCARPETAS */
+  Object.keys(nodo).forEach(nombre => {
     let div = document.createElement("div");
-    div.className = "item carpeta";
-    div.textContent = "📁 " + nombre;
+    div.className = "card carpeta";
+
+    div.innerHTML = `
+      <div class="titulo">📁 ${nombre}</div>
+    `;
 
     div.onclick = () => {
       rutaActual.push(nombre);
-      render();
+      mostrarCarpeta();
     };
 
-    cont.appendChild(div);
+    grid.appendChild(div);
   });
 
   /* 📄 ARCHIVOS */
-  nodo._archivos.forEach(p => {
-    let div = document.createElement("div");
-    div.className = "item archivo";
+  let nodoPadre = getNodoPadre([...rutaActual, "temp"]);
+  let nombreActual = rutaActual[rutaActual.length - 1];
 
-    div.innerHTML = `
-      <div class="titulo">${p.titulo}</div>
-      <div class="compositor">${p.compositor || ""}</div>
-    `;
-
-    div.onclick = () => verPDF(p.url);
-
-    cont.appendChild(div);
-  });
-
-  actualizarRuta();
-}
-
-/* =========================
-   🔙 VOLVER
-========================= */
-document.getElementById("btnAtras").onclick = () => {
-  if (rutaActual.length > 0) {
-    rutaActual.pop();
-    render();
-  }
-};
-
-/* =========================
-   📍 RUTA
-========================= */
-function actualizarRuta() {
-  let r = document.getElementById("ruta");
-
-  if (rutaActual.length === 0) {
-    r.textContent = "📁 Inicio";
-  } else {
-    r.textContent = "📁 " + rutaActual.join(" / ");
-  }
-}
-
-/* =========================
-   🔎 BUSCADOR
-========================= */
-document.getElementById("buscador").addEventListener("input", e => {
-  let texto = e.target.value.toLowerCase();
-
-  if (!texto) {
-    render();
-    return;
-  }
-
-  let cont = document.getElementById("lista");
-  cont.innerHTML = "";
-
-  data
-    .filter(p =>
-      (p.titulo + " " + p.compositor).toLowerCase().includes(texto)
-    )
-    .slice(0, 200)
-    .forEach(p => {
+  if (nombreActual && nodoPadre[nombreActual]) {
+    nodoPadre[nombreActual].archivos.forEach(p => {
       let div = document.createElement("div");
-      div.className = "item archivo";
+      div.className = "card archivo";
 
       div.innerHTML = `
         <div class="titulo">${p.titulo}</div>
@@ -182,15 +146,42 @@ document.getElementById("buscador").addEventListener("input", e => {
 
       div.onclick = () => verPDF(p.url);
 
-      cont.appendChild(div);
+      grid.appendChild(div);
     });
+  }
+}
 
-  document.getElementById("ruta").textContent = "🔎 Resultados";
+/* 🔎 BUSCADOR GLOBAL (no rompe carpetas) */
+document.getElementById("buscador").addEventListener("input", () => {
+  let texto = document.getElementById("buscador").value.toLowerCase();
+
+  if (!texto) {
+    mostrarCarpeta();
+    return;
+  }
+
+  let grid = document.getElementById("grid");
+  grid.innerHTML = "";
+
+  data
+    .filter(p => (p.titulo + " " + p.compositor).toLowerCase().includes(texto))
+    .slice(0, 200)
+    .forEach(p => {
+      let div = document.createElement("div");
+      div.className = "card archivo";
+
+      div.innerHTML = `
+        <div class="titulo">${p.titulo}</div>
+        <div class="compositor">${p.compositor || ""}</div>
+      `;
+
+      div.onclick = () => verPDF(p.url);
+
+      grid.appendChild(div);
+    });
 });
 
-/* =========================
-   📑 VISOR PDF
-========================= */
+/* 📑 VISOR PDF */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
@@ -202,6 +193,5 @@ function verPDF(url) {
   }
 }
 </script>
-
 </body>
 </html>
