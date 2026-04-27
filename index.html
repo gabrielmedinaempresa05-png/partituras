@@ -37,13 +37,19 @@ let carpetaActual = null;
 
 /* 📦 CARGAR JSON */
 fetch('data.json')
-  .then(res => res.json())
+  .then(res => {
+    console.log("STATUS:", res.status);
+    if (!res.ok) throw new Error("No carga JSON");
+    return res.json();
+  })
   .then(json => {
+    console.log("JSON OK:", json.length);
     data = json;
     construirEstructura();
     render();
   })
-  .catch(() => {
+  .catch(err => {
+    console.error("ERROR REAL:", err);
     document.getElementById("lista").innerHTML = "Error cargando datos";
   });
 
