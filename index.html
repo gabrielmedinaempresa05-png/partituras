@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -11,18 +12,20 @@
 <header>
   <h1>🎼 Biblioteca de Partituras</h1>
   <input type="text" id="buscador" placeholder="Buscar...">
-  <div id="ruta"></div>
+  <div id="ruta">📁 Inicio</div>
 </header>
 
 <div class="container">
 
   <!-- 📂 EXPLORADOR -->
+
   <div class="explorador">
     <button id="btnAtras">⬅ Volver</button>
     <div id="lista"></div>
   </div>
 
   <!-- 📑 VISOR -->
+
   <div class="visor">
     <iframe id="pdfFrame"></iframe>
   </div>
@@ -33,73 +36,86 @@
 let data = [];
 let estructura = {};
 let rutaActual = [];
-let carpetaActual = null;
 
-/* 📦 CARGAR JSON */
+/* =========================
+   📦 CARGAR JSON
+========================= */
 fetch('data.json')
-  .then(res => {
-    console.log("STATUS:", res.status);
-    if (!res.ok) throw new Error("No carga JSON");
-    return res.json();
-  })
+  .then(res => res.json())
   .then(json => {
-    console.log("JSON OK:", json.length);
     data = json;
     construirEstructura();
     render();
   })
   .catch(err => {
-    console.error("ERROR REAL:", err);
+    console.error(err);
     document.getElementById("lista").innerHTML = "Error cargando datos";
   });
 
-/* 🧠 CONSTRUIR ÁRBOL */
+/* =========================
+   🧠 CONSTRUIR ÁRBOL
+========================= */
 function construirEstructura() {
   estructura = {};
 
   data.forEach(p => {
     let partes = (p.carpeta || "General").split("/");
-
     let nivel = estructura;
 
-    partes.forEach(parte => {
+    partes.forEach((parte, i) => {
       if (!nivel[parte]) {
         nivel[parte] = { _archivos: [], _sub: {} };
       }
+
+      if (i === partes.length - 1) {
+        nivel[parte]._archivos.push(p);
+      }
+
       nivel = nivel[parte]._sub;
     });
-
-    // meter archivo en el último nivel
-    let ultimo = partes[partes.length - 1];
-    let ref = estructura;
-    partes.forEach(parte => {
-      ref = ref[parte];
-      if (parte !== ultimo) ref = ref._sub;
-    });
-
-    ref._archivos.push(p);
   });
 }
 
-/* 📂 OBTENER NIVEL ACTUAL */
+/* =========================
+   📂 OBTENER NIVEL ACTUAL
+========================= */
 function getNivel() {
   let nivel = estructura;
 
-  rutaActual.forEach(p => {
-    nivel = nivel[p]._sub;
-  });
+  for (let r of rutaActual) {
+    if (!nivel[r]) return null;
+    nivel = nivel[r]._sub;
+  }
 
   return nivel;
 }
 
-/* 🎨 RENDER */
+/* =========================
+   📄 OBTENER ARCHIVOS
+========================= */
+function obtenerArchivosNivel() {
+  if (rutaActual.length === 0) return [];
+
+  let ref = estructura;
+
+  rutaActual.forEach(r => {
+    ref = ref[r];
+  });
+
+  return ref._archivos || [];
+}
+
+/* =========================
+   🎨 RENDER
+========================= */
 function render() {
   let cont = document.getElementById("lista");
   cont.innerHTML = "";
 
   let nivel = getNivel();
+  if (!nivel) return;
 
-  // 📁 CARPETAS
+  /* 📁 CARPETAS */
   Object.keys(nivel).forEach(nombre => {
     let div = document.createElement("div");
     div.className = "item carpeta";
@@ -113,7 +129,7 @@ function render() {
     cont.appendChild(div);
   });
 
-  // 📄 ARCHIVOS
+  /* 📄 ARCHIVOS */
   let archivos = obtenerArchivosNivel();
 
   archivos.forEach(p => {
@@ -133,23 +149,9 @@ function render() {
   actualizarRuta();
 }
 
-/* 📄 OBTENER ARCHIVOS */
-function obtenerArchivosNivel() {
-  let nivel = estructura;
-
-  rutaActual.forEach(p => {
-    nivel = nivel[p]._sub;
-  });
-
-  let ref = estructura;
-  rutaActual.forEach(p => {
-    ref = ref[p];
-  });
-
-  return ref ? ref._archivos : [];
-}
-
-/* 🔙 VOLVER */
+/* =========================
+   🔙 VOLVER
+========================= */
 document.getElementById("btnAtras").onclick = () => {
   if (rutaActual.length > 0) {
     rutaActual.pop();
@@ -157,7 +159,9 @@ document.getElementById("btnAtras").onclick = () => {
   }
 };
 
-/* 📍 RUTA (breadcrumbs) */
+/* =========================
+   📍 RUTA
+========================= */
 function actualizarRuta() {
   let r = document.getElementById("ruta");
 
@@ -168,7 +172,9 @@ function actualizarRuta() {
   }
 }
 
-/* 🔎 BUSCADOR GLOBAL */
+/* =========================
+   🔎 BUSCADOR
+========================= */
 document.getElementById("buscador").addEventListener("input", e => {
   let texto = e.target.value.toLowerCase();
 
@@ -198,9 +204,13 @@ document.getElementById("buscador").addEventListener("input", e => {
 
       cont.appendChild(div);
     });
+
+  document.getElementById("ruta").textContent = "🔎 Resultados";
 });
 
-/* 📑 VISOR */
+/* =========================
+   📑 VISOR PDF
+========================= */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
