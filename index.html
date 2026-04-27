@@ -36,7 +36,7 @@ let rutaActual = [];
 let carpetaActual = null;
 
 /* 📦 CARGAR JSON */
-fetch('https://raw.githubusercontent.com/gabrielmedinaempresa05-png/partituras/main/data.json')
+fetch('data.json')
   .then(res => res.json())
   .then(json => {
     data = json;
