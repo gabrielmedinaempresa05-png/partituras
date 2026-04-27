@@ -1,10 +1,16 @@
+/* =========================
+   BASE
+========================= */
 body {
   margin: 0;
   font-family: "Segoe UI", Arial;
   background: #f4f5f7;
+  color: #1a1a1a;
 }
 
-/* HEADER */
+/* =========================
+   HEADER
+========================= */
 header {
   padding: 18px;
   text-align: center;
@@ -12,37 +18,50 @@ header {
   border-bottom: 1px solid #ddd;
 }
 
+h1 {
+  margin: 0;
+}
+
+/* BUSCADOR */
 #buscador {
   margin-top: 10px;
   width: 60%;
   padding: 12px;
   border-radius: 10px;
   border: 1px solid #ccc;
+  font-size: 15px;
 }
 
-/* LAYOUT */
+/* =========================
+   LAYOUT
+========================= */
 .container {
   display: flex;
   height: calc(100vh - 120px);
 }
 
-/* GRID */
+/* =========================
+   GRID
+========================= */
 .grid {
   width: 55%;
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-  padding: 16px;
+  gap: 18px;
+  padding: 18px;
   overflow-y: auto;
 }
 
-/* CARD */
+/* =========================
+   CARD BASE
+========================= */
 .card {
   background: white;
   border-radius: 14px;
-  padding: 14px;
+  padding: 16px;
   cursor: pointer;
-  border: 1px solid #e5e5e5;
+
+  border: 1px solid #e6e6e6;
 
   transition: all 0.25s ease;
 }
@@ -55,56 +74,124 @@ header {
 
 /* CLICK */
 .card:active {
-  transform: scale(0.97);
+  transform: scale(0.96);
 }
 
-/* CARPETA */
+/* =========================
+   CARPETAS (tipo Drive)
+========================= */
 .carpeta {
-  background: linear-gradient(135deg, #ffffff, #f3f3f3);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
   font-weight: 600;
+  font-size: 14px;
+
+  background: linear-gradient(135deg, #ffffff, #f3f3f3);
+  border-left: 5px solid #f4b400; /* amarillo carpeta */
 }
 
-/* BOTÓN VOLVER */
+.carpeta::before {
+  content: "📁";
+  font-size: 18px;
+}
+
+/* botón volver */
 .volver {
   background: #222;
   color: white;
+  border-left: none;
 }
 
-/* ARCHIVO */
+.volver::before {
+  content: "⬅️";
+}
+
+/* =========================
+   ARCHIVOS (partituras)
+========================= */
 .archivo {
-  border-left: 4px solid #4a90e2;
+  display: flex;
+  flex-direction: column;
+
+  border-left: 5px solid #4285f4; /* azul tipo drive */
+  background: #ffffff;
 }
 
-/* TEXTO */
+.archivo::before {
+  content: "📄";
+  font-size: 18px;
+  margin-bottom: 6px;
+}
+
+/* =========================
+   TEXTO
+========================= */
 .titulo {
   font-size: 14px;
   font-weight: 600;
+  margin-bottom: 4px;
 }
 
 .compositor {
   font-size: 12px;
   color: #777;
+  font-style: italic;
 }
 
-/* VISOR */
+/* =========================
+   VISOR PDF
+========================= */
 .visor {
   width: 45%;
-  padding: 10px;
+  padding: 12px;
+  background: #f0f1f3;
 }
 
 iframe {
   width: 100%;
   height: 100%;
-  border-radius: 10px;
+  border-radius: 12px;
   border: none;
   background: white;
 }
 
-/* SCROLL */
+/* =========================
+   SCROLL PRO
+========================= */
 .grid::-webkit-scrollbar {
   width: 8px;
 }
+
 .grid::-webkit-scrollbar-thumb {
   background: #ccc;
   border-radius: 10px;
+}
+
+.grid::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 900px) {
+
+  .container {
+    flex-direction: column;
+  }
+
+  .grid {
+    width: 100%;
+  }
+
+  .visor {
+    width: 100%;
+    height: 300px;
+  }
+
+  #buscador {
+    width: 90%;
+  }
 }
