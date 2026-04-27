@@ -34,7 +34,7 @@
 
 <script>
 let data = [];
-let estructura = {};
+let estructura = { _archivos: [], _sub: {} };
 let rutaActual = [];
 
 /* =========================
@@ -56,53 +56,35 @@ fetch('data.json')
    🧠 CONSTRUIR ÁRBOL
 ========================= */
 function construirEstructura() {
-  estructura = {};
+  estructura = { _archivos: [], _sub: {} };
 
   data.forEach(p => {
     let partes = (p.carpeta || "General").split("/");
-    let nivel = estructura;
+    let nodo = estructura;
 
-    partes.forEach((parte, i) => {
-      if (!nivel[parte]) {
-        nivel[parte] = { _archivos: [], _sub: {} };
+    partes.forEach(parte => {
+      if (!nodo._sub[parte]) {
+        nodo._sub[parte] = { _archivos: [], _sub: {} };
       }
-
-      if (i === partes.length - 1) {
-        nivel[parte]._archivos.push(p);
-      }
-
-      nivel = nivel[parte]._sub;
+      nodo = nodo._sub[parte];
     });
+
+    nodo._archivos.push(p);
   });
 }
 
 /* =========================
    📂 OBTENER NIVEL ACTUAL
 ========================= */
-function getNivel() {
-  let nivel = estructura;
+function getNodoActual() {
+  let nodo = estructura;
 
   for (let r of rutaActual) {
-    if (!nivel[r]) return null;
-    nivel = nivel[r]._sub;
+    if (!nodo._sub[r]) return null;
+    nodo = nodo._sub[r];
   }
 
-  return nivel;
-}
-
-/* =========================
-   📄 OBTENER ARCHIVOS
-========================= */
-function obtenerArchivosNivel() {
-  if (rutaActual.length === 0) return [];
-
-  let ref = estructura;
-
-  rutaActual.forEach(r => {
-    ref = ref[r];
-  });
-
-  return ref._archivos || [];
+  return nodo;
 }
 
 /* =========================
@@ -112,11 +94,11 @@ function render() {
   let cont = document.getElementById("lista");
   cont.innerHTML = "";
 
-  let nivel = getNivel();
-  if (!nivel) return;
+  let nodo = getNodoActual();
+  if (!nodo) return;
 
   /* 📁 CARPETAS */
-  Object.keys(nivel).forEach(nombre => {
+  Object.keys(nodo._sub).sort().forEach(nombre => {
     let div = document.createElement("div");
     div.className = "item carpeta";
     div.textContent = "📁 " + nombre;
@@ -130,9 +112,7 @@ function render() {
   });
 
   /* 📄 ARCHIVOS */
-  let archivos = obtenerArchivosNivel();
-
-  archivos.forEach(p => {
+  nodo._archivos.forEach(p => {
     let div = document.createElement("div");
     div.className = "item archivo";
 
