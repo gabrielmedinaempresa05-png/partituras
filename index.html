@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="es">
 <head>
 <meta charset="UTF-8">
@@ -12,19 +11,11 @@
 <header>
   <h1>🎼 Biblioteca de Partituras</h1>
   <input type="text" id="buscador" placeholder="Buscar...">
-  <div id="ruta">📁 Inicio</div>
 </header>
 
 <div class="container">
 
-  <!-- 📂 EXPLORADOR -->
-
-  <div class="explorador">
-    <button id="btnAtras">⬅ Volver</button>
-    <div id="lista"></div>
-  </div>
-
-  <!-- 📑 VISOR -->
+  <div class="grid" id="grid"></div>
 
   <div class="visor">
     <iframe id="pdfFrame"></iframe>
@@ -36,9 +27,8 @@
 let data = [];
 let estructura = {};
 let rutaActual = [];
-let carpetaActual = null;
 
-/* 📦 CARGA SEGURA */
+/* 📦 CARGA JSON (anti-cache) */
 fetch('./data.json?v=' + Date.now())
   .then(res => res.json())
   .then(json => {
@@ -48,10 +38,10 @@ fetch('./data.json?v=' + Date.now())
   })
   .catch(err => {
     console.error(err);
-    document.getElementById("grid").innerHTML = "Error cargando datos";
+    document.getElementById("grid").innerHTML = "❌ Error cargando datos";
   });
 
-/* 🧠 CONSTRUIR ÁRBOL REAL */
+/* 🧠 CREAR ÁRBOL REAL */
 function construirEstructura() {
   estructura = {};
 
@@ -59,68 +49,59 @@ function construirEstructura() {
     let partes = (item.carpeta || "General").split("/");
     let nodo = estructura;
 
-    partes.forEach(parte => {
+    partes.forEach((parte, i) => {
       if (!nodo[parte]) {
         nodo[parte] = {
-          subcarpetas: {},
+          sub: {},
           archivos: []
         };
       }
-      nodo = nodo[parte].subcarpetas;
-    });
 
-    // meter archivo en la carpeta final
-    let ultima = partes[partes.length - 1];
-    let carpetaPadre = getNodoPadre(partes);
-    carpetaPadre[ultima].archivos.push(item);
+      if (i === partes.length - 1) {
+        nodo[parte].archivos.push(item);
+      }
+
+      nodo = nodo[parte].sub;
+    });
   });
 }
 
-/* 🔍 obtener nodo padre */
-function getNodoPadre(partes) {
-  let nodo = estructura;
-  for (let i = 0; i < partes.length - 1; i++) {
-    nodo = nodo[partes[i]].subcarpetas;
-  }
-  return nodo;
-}
-
-/* 📂 obtener nodo actual */
-function getNodoActual() {
+/* 📂 NODO ACTUAL */
+function getNodo() {
   let nodo = estructura;
   rutaActual.forEach(p => {
-    nodo = nodo[p].subcarpetas;
+    nodo = nodo[p].sub;
   });
   return nodo;
 }
 
-/* 🎨 MOSTRAR */
+/* 🎨 RENDER */
 function mostrarCarpeta() {
   let grid = document.getElementById("grid");
   grid.innerHTML = "";
 
-  let nodo = getNodoActual();
+  let nodo = getNodo();
 
-  /* 🔙 botón atrás */
+  /* 🔙 volver */
   if (rutaActual.length > 0) {
     let back = document.createElement("div");
-    back.className = "card carpeta";
+    back.className = "card carpeta volver";
     back.innerHTML = "⬅️ Volver";
+
     back.onclick = () => {
       rutaActual.pop();
       mostrarCarpeta();
     };
+
     grid.appendChild(back);
   }
 
-  /* 📁 SUBCARPETAS */
+  /* 📁 carpetas */
   Object.keys(nodo).forEach(nombre => {
     let div = document.createElement("div");
     div.className = "card carpeta";
 
-    div.innerHTML = `
-      <div class="titulo">📁 ${nombre}</div>
-    `;
+    div.innerHTML = `<div class="titulo">📁 ${nombre}</div>`;
 
     div.onclick = () => {
       rutaActual.push(nombre);
@@ -130,12 +111,15 @@ function mostrarCarpeta() {
     grid.appendChild(div);
   });
 
-  /* 📄 ARCHIVOS */
-  let nodoPadre = getNodoPadre([...rutaActual, "temp"]);
-  let nombreActual = rutaActual[rutaActual.length - 1];
+  /* 📄 archivos */
+  let nodoPadre = estructura;
+  rutaActual.forEach(p => {
+    nodoPadre = nodoPadre[p];
+    if (nodoPadre.sub) nodoPadre = nodoPadre;
+  });
 
-  if (nombreActual && nodoPadre[nombreActual]) {
-    nodoPadre[nombreActual].archivos.forEach(p => {
+  if (nodoPadre.archivos) {
+    nodoPadre.archivos.forEach(p => {
       let div = document.createElement("div");
       div.className = "card archivo";
 
@@ -151,7 +135,7 @@ function mostrarCarpeta() {
   }
 }
 
-/* 🔎 BUSCADOR GLOBAL (no rompe carpetas) */
+/* 🔎 BUSCADOR GLOBAL */
 document.getElementById("buscador").addEventListener("input", () => {
   let texto = document.getElementById("buscador").value.toLowerCase();
 
@@ -193,5 +177,6 @@ function verPDF(url) {
   }
 }
 </script>
+
 </body>
 </html>
