@@ -10,15 +10,16 @@
 
 <header>
   <h1>🎼 Biblioteca de Partituras</h1>
-  <input type="text" id="buscador" placeholder="Buscar partituras...">
+  <input type="text" id="buscador" placeholder="Buscar...">
+  <div id="ruta"></div>
 </header>
 
 <div class="container">
 
-  <!-- 📄 LISTA -->
-  <div class="contenido">
-    <div class="grid" id="grid"></div>
-    <button id="cargarMas">Cargar más</button>
+  <!-- 📂 EXPLORADOR -->
+  <div class="explorador">
+    <button id="btnAtras">⬅ Volver</button>
+    <div id="lista"></div>
   </div>
 
   <!-- 📑 VISOR -->
@@ -30,100 +31,168 @@
 
 <script>
 let data = [];
-let filtrado = [];
-let pagina = 0;
-const porPagina = 40;
+let estructura = {};
+let rutaActual = [];
+let carpetaActual = null;
 
-/* =========================
-   CARGA JSON
-========================= */
+/* 📦 CARGAR JSON */
 fetch('./data.json')
   .then(res => res.json())
   .then(json => {
     data = json;
-    aplicarFiltro();
+    construirEstructura();
+    render();
   })
-  .catch(err => {
-    console.error(err);
-    document.getElementById("grid").innerHTML = "Error cargando datos";
+  .catch(() => {
+    document.getElementById("lista").innerHTML = "Error cargando datos";
   });
 
-/* =========================
-   BUSCADOR
-========================= */
-document.getElementById("buscador").addEventListener("input", () => {
-  pagina = 0;
-  aplicarFiltro();
-});
+/* 🧠 CONSTRUIR ÁRBOL */
+function construirEstructura() {
+  estructura = {};
 
-/* =========================
-   FILTRO
-========================= */
-function aplicarFiltro() {
-  let texto = document.getElementById("buscador").value.toLowerCase();
+  data.forEach(p => {
+    let partes = (p.carpeta || "General").split("/");
 
-  filtrado = data.filter(p => {
-    if (!texto) return true;
+    let nivel = estructura;
 
-    return (p.titulo + " " + p.compositor)
-      .toLowerCase()
-      .includes(texto);
+    partes.forEach(parte => {
+      if (!nivel[parte]) {
+        nivel[parte] = { _archivos: [], _sub: {} };
+      }
+      nivel = nivel[parte]._sub;
+    });
+
+    // meter archivo en el último nivel
+    let ultimo = partes[partes.length - 1];
+    let ref = estructura;
+    partes.forEach(parte => {
+      ref = ref[parte];
+      if (parte !== ultimo) ref = ref._sub;
+    });
+
+    ref._archivos.push(p);
   });
-
-  render();
 }
 
-/* =========================
-   RENDER
-========================= */
+/* 📂 OBTENER NIVEL ACTUAL */
+function getNivel() {
+  let nivel = estructura;
+
+  rutaActual.forEach(p => {
+    nivel = nivel[p]._sub;
+  });
+
+  return nivel;
+}
+
+/* 🎨 RENDER */
 function render() {
-  let grid = document.getElementById("grid");
+  let cont = document.getElementById("lista");
+  cont.innerHTML = "";
 
-  if (pagina === 0) grid.innerHTML = "";
+  let nivel = getNivel();
 
-  let inicio = pagina * porPagina;
-  let fin = inicio + porPagina;
-
-  filtrado.slice(inicio, fin).forEach((p, i) => {
+  // 📁 CARPETAS
+  Object.keys(nivel).forEach(nombre => {
     let div = document.createElement("div");
-    div.className = "card";
+    div.className = "item carpeta";
+    div.textContent = "📁 " + nombre;
 
-    // 🔥 marcar el primero
-    if (i === 0 && pagina === 0) {
-      div.classList.add("activo");
-    }
+    div.onclick = () => {
+      rutaActual.push(nombre);
+      render();
+    };
+
+    cont.appendChild(div);
+  });
+
+  // 📄 ARCHIVOS
+  let archivos = obtenerArchivosNivel();
+
+  archivos.forEach(p => {
+    let div = document.createElement("div");
+    div.className = "item archivo";
 
     div.innerHTML = `
       <div class="titulo">${p.titulo}</div>
       <div class="compositor">${p.compositor || ""}</div>
     `;
 
-    div.onclick = () => {
-      document.querySelectorAll(".card").forEach(c => c.classList.remove("activo"));
-      div.classList.add("activo");
-      verPDF(p.url);
-    };
+    div.onclick = () => verPDF(p.url);
 
-    grid.appendChild(div);
+    cont.appendChild(div);
   });
 
-  // 🔥 auto abrir el primero del filtro
-  if (filtrado.length > 0 && pagina === 0) {
-    verPDF(filtrado[0].url);
-  }
+  actualizarRuta();
 }
 
-/* =========================
-   CARGAR MÁS
-========================= */
-document.getElementById("cargarMas").onclick = () => {
-  pagina++;
+/* 📄 OBTENER ARCHIVOS */
+function obtenerArchivosNivel() {
+  let nivel = estructura;
+
+  rutaActual.forEach(p => {
+    nivel = nivel[p]._sub;
+  });
+
+  let ref = estructura;
+  rutaActual.forEach(p => {
+    ref = ref[p];
+  });
+
+  return ref ? ref._archivos : [];
+}
+
+/* 🔙 VOLVER */
+document.getElementById("btnAtras").onclick = () => {
+  rutaActual.pop();
   render();
 };
 
-/* =========================
-   VISOR PDF
-========================= */
+/* 📍 RUTA (breadcrumbs) */
+function actualizarRuta() {
+  let r = document.getElementById("ruta");
+
+  if (rutaActual.length === 0) {
+    r.textContent = "📁 Inicio";
+  } else {
+    r.textContent = "📁 " + rutaActual.join(" / ");
+  }
+}
+
+/* 🔎 BUSCADOR GLOBAL */
+document.getElementById("buscador").addEventListener("input", e => {
+  let texto = e.target.value.toLowerCase();
+
+  if (!texto) {
+    render();
+    return;
+  }
+
+  let cont = document.getElementById("lista");
+  cont.innerHTML = "";
+
+  data
+    .filter(p =>
+      (p.titulo + " " + p.compositor).toLowerCase().includes(texto)
+    )
+    .slice(0, 200)
+    .forEach(p => {
+      let div = document.createElement("div");
+      div.className = "item archivo";
+
+      div.innerHTML = `
+        <div class="titulo">${p.titulo}</div>
+        <div class="compositor">${p.compositor || ""}</div>
+      `;
+
+      div.onclick = () => verPDF(p.url);
+
+      cont.appendChild(div);
+    });
+});
+
+/* 📑 VISOR */
 function verPDF(url) {
   let match = url.match(/\/d\/(.*?)\//);
 
