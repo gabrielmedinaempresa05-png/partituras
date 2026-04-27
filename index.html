@@ -36,7 +36,7 @@ let rutaActual = [];
 let carpetaActual = null;
 
 /* 📦 CARGAR JSON */
-fetch('./data.json')
+fetch('https://raw.githubusercontent.com/gabrielmedinaempresa05-png/partituras/main/data.json')
   .then(res => res.json())
   .then(json => {
     data = json;
@@ -145,8 +145,10 @@ function obtenerArchivosNivel() {
 
 /* 🔙 VOLVER */
 document.getElementById("btnAtras").onclick = () => {
-  rutaActual.pop();
-  render();
+  if (rutaActual.length > 0) {
+    rutaActual.pop();
+    render();
+  }
 };
 
 /* 📍 RUTA (breadcrumbs) */
