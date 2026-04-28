@@ -10,7 +10,7 @@
 
 <header>
   <h1>🎼 Biblioteca de Partituras</h1>
-  <input type="text" id="buscador" placeholder="Buscar...">
+  <input type="text" id="buscador" placeholder="Buscar partitura...">
 </header>
 
 <div class="container">
@@ -23,147 +23,70 @@
 
 </div>
 
+<button id="cargarMas">Cargar más</button>
+
 <script>
 let data = [];
-let estructura = {};
-let rutaActual = [];
+let filtrado = [];
+let pagina = 0;
+const porPagina = 60;
 
-/* 📦 CARGA JSON (anti-cache) */
+/* 📦 CARGAR JSON */
 fetch('./data.json?v=' + Date.now())
   .then(res => res.json())
   .then(json => {
     data = json;
-    construirEstructura();
-    mostrarCarpeta();
+    filtrado = data;
+    render();
   })
   .catch(err => {
     console.error(err);
     document.getElementById("grid").innerHTML = "❌ Error cargando datos";
   });
 
-/* 🧠 CREAR ÁRBOL REAL */
-function construirEstructura() {
-  estructura = {};
-
-  data.forEach(item => {
-    let partes = (item.carpeta || "General").split("/");
-    let nodo = estructura;
-
-    partes.forEach((parte, i) => {
-      if (!nodo[parte]) {
-        nodo[parte] = {
-          sub: {},
-          archivos: []
-        };
-      }
-
-      if (i === partes.length - 1) {
-        nodo[parte].archivos.push(item);
-      }
-
-      nodo = nodo[parte].sub;
-    });
-  });
-}
-
-/* 📂 NODO ACTUAL */
-function getNodo() {
-  let nodo = estructura;
-  rutaActual.forEach(p => {
-    nodo = nodo[p].sub;
-  });
-  return nodo;
-}
-
-/* 🎨 RENDER */
-function mostrarCarpeta() {
-  let grid = document.getElementById("grid");
-  grid.innerHTML = "";
-
-  let nodo = getNodo();
-
-  /* 🔙 volver */
-  if (rutaActual.length > 0) {
-    let back = document.createElement("div");
-    back.className = "card carpeta volver";
-    back.innerHTML = "⬅️ Volver";
-
-    back.onclick = () => {
-      rutaActual.pop();
-      mostrarCarpeta();
-    };
-
-    grid.appendChild(back);
-  }
-
-  /* 📁 carpetas */
-  Object.keys(nodo).forEach(nombre => {
-    let div = document.createElement("div");
-    div.className = "card carpeta";
-
-    div.innerHTML = `<div class="titulo">📁 ${nombre}</div>`;
-
-    div.onclick = () => {
-      rutaActual.push(nombre);
-      mostrarCarpeta();
-    };
-
-    grid.appendChild(div);
-  });
-
-  /* 📄 archivos */
-  let nodoPadre = estructura;
-  rutaActual.forEach(p => {
-    nodoPadre = nodoPadre[p];
-    if (nodoPadre.sub) nodoPadre = nodoPadre;
-  });
-
-  if (nodoPadre.archivos) {
-    nodoPadre.archivos.forEach(p => {
-      let div = document.createElement("div");
-      div.className = "card archivo";
-
-      div.innerHTML = `
-        <div class="titulo">${p.titulo}</div>
-        <div class="compositor">${p.compositor || ""}</div>
-      `;
-
-      div.onclick = () => verPDF(p.url);
-
-      grid.appendChild(div);
-    });
-  }
-}
-
-/* 🔎 BUSCADOR GLOBAL */
+/* 🔎 BUSCADOR */
 document.getElementById("buscador").addEventListener("input", () => {
   let texto = document.getElementById("buscador").value.toLowerCase();
 
-  if (!texto) {
-    mostrarCarpeta();
-    return;
-  }
+  filtrado = data.filter(p =>
+    (p.titulo + " " + p.compositor + " " + (p.carpeta || ""))
+      .toLowerCase()
+      .includes(texto)
+  );
 
-  let grid = document.getElementById("grid");
-  grid.innerHTML = "";
-
-  data
-    .filter(p => (p.titulo + " " + p.compositor).toLowerCase().includes(texto))
-    .slice(0, 200)
-    .forEach(p => {
-      let div = document.createElement("div");
-      div.className = "card archivo";
-
-      div.innerHTML = `
-        <div class="titulo">${p.titulo}</div>
-        <div class="compositor">${p.compositor || ""}</div>
-      `;
-
-      div.onclick = () => verPDF(p.url);
-
-      grid.appendChild(div);
-    });
+  pagina = 0;
+  document.getElementById("grid").innerHTML = "";
+  render();
 });
+
+/* 🎨 RENDER */
+function render() {
+  let grid = document.getElementById("grid");
+
+  let inicio = pagina * porPagina;
+  let fin = inicio + porPagina;
+
+  filtrado.slice(inicio, fin).forEach(p => {
+    let div = document.createElement("div");
+    div.className = "card";
+
+    div.innerHTML = `
+      <div class="titulo">${p.titulo}</div>
+      <div class="compositor">${p.compositor || ""}</div>
+      <div class="ruta">${p.carpeta || ""}</div>
+    `;
+
+    div.onclick = () => verPDF(p.url);
+
+    grid.appendChild(div);
+  });
+}
+
+/* ➕ CARGAR MÁS */
+document.getElementById("cargarMas").onclick = () => {
+  pagina++;
+  render();
+};
 
 /* 📑 VISOR PDF */
 function verPDF(url) {
